@@ -24,10 +24,10 @@ typedef uint_fast8_t  suit_t, card_t;
 
 /* Macros to deal with AIs returning their result as a packed 32-bit int.  We
  * pack the values like this as this makes our AI functions pure. */
-#define ESPACK(A,B)	(A) = ((A) & 65535) | ((B) << 16)
+#define ESPACK(A,B)	(A) = ((A) & 0xFFFF) | ((B) << 16)
 #define ESUPACK(A)	((A) >> 16)
-#define MPACK(A,B)	(A) = ((A) & 4294901760) | (B)
-#define MUPACK(A)	((A) & 65535)
+#define MPACK(A,B)	(A) = ((A) & 0xFFFF0000) | (B)
+#define MUPACK(A)	((A) & 0xFFFF)
 
 enum suit {
 	CLUBS,

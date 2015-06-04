@@ -22,13 +22,13 @@ all: ${FAI}
 	make debug
 
 release: ${FAI}
-	${cc} ${WFLAGS} ${CFLAGS} ${SFLAGS} ${RFLAGS} ${FAI} -s -o p8
+	${cc} ${WFLAGS} ${CFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -s -o p8
 
 debug: ${FAI}
-	${cc} -DMONTE_VERBOSE ${WFLAGS} ${CFLAGS} ${SFLAGS} ${DFLAGS} ${FAI} -o p8
+	${cc} -DMONTE_VERBOSE ${WFLAGS} ${CFLAGS} ${DFLAGS} ${FAI} ${SFLAGS} -o p8
 
 warn: ${FAI}
-	${cc} -DMONTE_VERBOSE ${WFLAGS} ${WEXTRA} ${CFLAGS} ${RFLAGS} ${SFLAGS} ${DFLAGS} ${FAI} -o p8
+	${cc} -DMONTE_VERBOSE ${WFLAGS} ${WEXTRA} ${CFLAGS} ${RFLAGS} ${DFLAGS} ${FAI} ${SFLAGS} -o p8
 
 loud: ${FAI}
 	@CFLAGS="${CFLAGS} ${RFLAGS} -DMONTE_VERBOSE" make debug
@@ -40,19 +40,19 @@ includegraph: ${FAI}
 	echo -e "digraph {\n`grep -r include * | egrep -v README\|TODO\|Makefile\|ccglue\|cscope\|Binary\|\.c:# | sed -e 's/^\([^:]*\):[^\ ]*\ \(.*\)/"\1"->\2/g' -e 's/\.\.\///' -e 's/ai\///' -e 's/>\->/*>->/'`}" | xdot - &
 
 callgraph: ${FAI}
-	${cc} ${WFLAGS} ${SFLAGS} ${DFLAGS} -fdump-rtl-expand ${FAI} -o p8
+	${cc} ${WFLAGS} ${DFLAGS} -fdump-rtl-expand ${FAI} ${SFLAGS} -o p8
 	@egypt *.c.*.expand | xdot - &
 	@sleep 3
 	@make clean
 
 profile: ${FAI}
-	${cc} -fprofile-generate ${CFLAGS} ${WFLAGS} ${SFLAGS} ${RFLAGS} ${FAI} -o p8
+	${cc} -fprofile-generate ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -o p8
 	./p8 -m67 >/dev/null
-	${cc} ${PFLAGS} ${CFLAGS} ${WFLAGS} ${SFLAGS} ${RFLAGS} ${FAI} -s -o p8
+	${cc} ${PFLAGS} ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -s -o p8
 	@make clean
 
 gprof: ${FAI}
-	${cc} -fprofile-generate ${NRAND} ${TFLAGS} ${CFLAGS} ${WFLAGS} ${SFLAGS} ${RFLAGS} ${PROFILE} ${FAI} -o p8
+	${cc} -fprofile-generate ${NRAND} ${TFLAGS} ${CFLAGS} ${WFLAGS} ${RFLAGS} ${PROFILE} ${FAI} ${SFLAGS} -o p8
 	./p8 -g400 -m5432 >/dev/null
 	echo "gcov'ing...`for a in ${FAI} ; do gcov -b $$a > /dev/null ; done`"
 	gprof -bcz p8 | gprof2dot -n.1 -e.02 | sed 's/digraph\ /digraph\ callgrind\ /' | xdot - &
@@ -60,14 +60,14 @@ gprof: ${FAI}
 	@make clean
 
 callgrind: ${FAI}
-	${cc} -g -DMONTE_VERBOSE ${NRAND} ${CFLAGS} ${WFLAGS} ${SFLAGS} ${RFLAGS} ${PROFILE} ${FAI} -o p8
+	${cc} -g -DMONTE_VERBOSE ${NRAND} ${CFLAGS} ${WFLAGS} ${RFLAGS} ${PROFILE} ${FAI} ${SFLAGS} -o p8
 	@valgrind --tool=callgrind --collect-systime=yes ./p8 -m0543 -vv
 	cat callgrind.out.* | gprof2dot -n.1 -e.02 -f callgrind | sed 's/digraph\ /digraph\ callgrind\ /' | xdot - &
 	@sleep 1
 	@make clean
 
 asm: ${FAI}
-	${cc} -S ${CFLAGS} ${WFLAGS} ${SFLAGS} ${RFLAGS} ${FAI}
+	${cc} -S ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS}
 
 clean:
 	@rm -f *.expand *.png *.gcda *.s *.gcov *.gcno gmon.out *.tmp callgrind.out.*

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ -z "$1" -o -z "$2" ] ; then
+	echo "Pass me two AIs (numbers) to compare"
+	./p8
+	exit 1
+fi
+
+function cleanup
+{
+	stats ${lsm[@]}
+	echo "${lsm[@]}" | tr ' ' '\n' | sed -e 's/\.[5-9]/+1/g' -e 's/\.[0-4]/+0/g' | bc | sort -n | uniq -c | grep -v [^0-9][12]\ [0-9]
+	exit 0
+}
+
+trap "cleanup" SIGINT
+
+echo "Comparing AIs $1 and $2..."
+
+wo=0
+t=0
+typ=0
+declare -a lsm
+while [ 1 ] ; do
+	v=0
+	if [ "$typ" -eq "0" ] ; then
+		typ=1
+		if [ -n "`./p8 -m$1$2 | grep Conclu | awk '{ print $5 }' | grep m0`" ] ; then
+			v=1
+			let "wo++"
+		fi
+	else
+		typ=0
+		if [ -n "`./p8 -m$2$1 | grep Conclu | awk '{ print $5 }' | grep m1`" ] ; then
+			v=1
+			let "wo++"
+		fi
+	fi
+	let "t++"
+	echo -n "$t ::  % "
+	x="`echo "scale=3;100*$wo/$t" | bc`"
+	echo "$x"
+	lsm+=("$v")
+done

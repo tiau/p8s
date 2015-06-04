@@ -1,0 +1,14 @@
+ccglue.out
+cscope.out
+tags
+*.swp
+*.expand
+*.png
+*.gcda
+*.s
+*.gcov
+*.gcno
+gmon.out
+*.tmp
+callgrind.out.*
+p8

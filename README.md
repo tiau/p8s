@@ -23,6 +23,7 @@ Try:
 
 Want to watch the AI play against itself?  Try:
 > make loud
+>
 > ./p8 -m66 -vv
 
 
@@ -146,6 +147,6 @@ First comes the move number: move 0 is **AH**.  Next is how close to the maximum
 
 Next comes a number showing how far (in win percentage) the move was from the best move at the time.  So the **AH** move was tending to win ~25.8% less than the best alternative move when it was dropped from consideration.  The flush of hearts ending on a two was 0% less likely to win than the best move at the time since it was the best move.
 
-The next number shows (in win percentage) what the cutoff was to stop considering a move at the time.  Since so few attempts had been made with the **AH** move the cutoff was huge, 25.5%.  Later on, when trying to decide between the various flushes of hearts the cutoff was much lower as each move had been considering for many more hypothetical games and the AI was much more sure of their relative goodness.
+The next number shows (in win percentage) what the cutoff was to stop considering a move at the time.  Since so few attempts had been made with the **AH** move the cutoff was huge, 25.5%.  Later on, when trying to decide between the various flushes of hearts the cutoff was much lower as each move had been considered for many more hypothetical games and the AI was much more sure of their relative goodness.
 
 The final number is the win percentage for the given move.  The **AH** move, if made, would tend to lead to a much lower chance of winning, 28.8%, than the **AH, 3H, JH, QH, 2H** move, 46.1%; this is clearly because playing just the **AH** would result in the inability to play either the flush of hearts or even the pair of aces.

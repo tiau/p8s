@@ -5,7 +5,7 @@
 #define UTIL_H
 
 int cmpcardt(const void* const c1, const void* const c2)
-	__attribute__((hot,pure));
+	__attribute__((hot,pure,nonnull));
 
 
 __attribute__((hot,const,always_inline))

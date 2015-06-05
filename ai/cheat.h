@@ -3,7 +3,8 @@
 
 /* The Cheat AI is the same as the Monte AI except that it doesn't shuffle its
  * opponent's hands into the deck and then deal them new cards.  Instead it
- * leaves all the hands as they are; which is to say, it cheats. */
+ * leaves all the hands as they are.  It also doesn't shuffle the deck.  In
+ * short, it cheats, a lot. */
 
 #ifndef AI_CHEAT_H
 #define AI_CHEAT_H

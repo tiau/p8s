@@ -17,35 +17,39 @@ void dealStateSans(struct gamestate* const restrict gs, const struct gamestate* 
 			if(!playerDrawCard(gs, &gs->players[i]))
 				assert(false);
 
-	assert(gs->players[0].n);
-	assert(gs->players[0].n < DECKLEN);
-	assert(gs->players[1].n);
-	assert(gs->players[1].n < DECKLEN);
+	{	assert(gs->players[0].n);
+		assert(gs->players[0].n < DECKLEN);
+		assert(gs->players[1].n);
+		assert(gs->players[1].n < DECKLEN);}
 }
 
-void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
+void initGameStateHypoShared(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
 	{	assert(gs);
-		assert(ogs);
+		assert(ogs->pile.n);
 		assert(ogs->players);
 		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);}
 
-	const struct player* player = stateToPlayer(ogs);
-
-	initDeckSans(&gs->deck, player, &ogs->pile);
 	gs->pile = ogs->pile;
 	gs->pile.top = gs->pile.c + ogs->pile.n - 1;
 	gs->players = calloc(ogs->nplayers, sizeof(struct player));
 	assert(gs->players);
 	gs->nplayers = ogs->nplayers;
-	dealStateSans(gs, ogs);
 	gs->turn = 0;
 	gs->eightSuit = ogs->eightSuit;
 	gs->drew = ogs->drew;
 	gs->magic = false;
-	{	assert(gs->pile.n);
-		assert(gs->pile.n < DECKLEN);
-		assert(gs->deck.n < DECKLEN);}
+}
+
+void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
+{
+	assert(ogs);
+
+	const struct player* player = stateToPlayer(ogs);
+
+	initGameStateHypoShared(gs, ogs);
+	initDeckSans(&gs->deck, player, &ogs->pile);
+	dealStateSans(gs, ogs);
 }
 
 float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))

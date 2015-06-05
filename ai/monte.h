@@ -50,6 +50,10 @@ void dealStateSans(struct gamestate* const restrict gs,
 				   const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));
 
+void initGameStateHypoShared(struct gamestate* const restrict gs,
+							 const struct gamestate* const restrict ogs)
+	__attribute__((hot,nonnull));
+
 void initGameStateHypothetical(struct gamestate* const restrict gs,
 							   const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));

@@ -30,33 +30,21 @@ void stackTheDeck(struct deck* const restrict deck, const size_t tch)
 
 void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
-	size_t i, tch = 0;
+	size_t tch = 0;
 
-	{	assert(gs);
-		assert(ogs);
-		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);
-		assert(ogs->players);}
+	{	assert(ogs);
+		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);}
 
 	/* Calculate how many cards our opponents hold, for deck stacking */
 	size_t cih[ogs->nplayers];
 	populateCIH(ogs, cih);
-	for(i = 0; i < ogs->nplayers-1; i++)
+	for(size_t i = 0; i < ogs->nplayers-1; i++)
 		tch += cih[i];
 
+	initGameStateHypoShared(gs, ogs);
 	initDeckSans(&gs->deck, stateToPlayer(ogs), &ogs->pile);
-	gs->pile = ogs->pile;
-	gs->pile.top = gs->pile.c + ogs->pile.n - 1;
-	gs->players = calloc(ogs->nplayers, sizeof(struct player));
-	assert(gs->players);
-	gs->nplayers = ogs->nplayers;
 	stackTheDeck(&gs->deck, tch);
 	dealStateSans(gs, ogs);
-	/* Cannot run a hypothetical game from before anything has happened */
-	assert(gs->pile.n);
-	gs->turn = 0;
-	gs->eightSuit = ogs->eightSuit;
-	gs->drew = ogs->drew;
-	gs->magic = false;
 }
 
 uint_fast32_t aiStacked(const struct aistate* const restrict as)

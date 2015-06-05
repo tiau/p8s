@@ -41,7 +41,7 @@ void initGameStateHypoShared(struct gamestate* const restrict gs, const struct g
 	gs->magic = false;
 }
 
-void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
+__attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
 	assert(ogs);
 
@@ -52,7 +52,7 @@ void initGameStateHypothetical(struct gamestate* const restrict gs, const struct
 	dealStateSans(gs, ogs);
 }
 
-float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
+__attribute__((hot,pure,nonnull)) static float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
 {
 	size_t airv = 0, t;
 	const struct play* play;
@@ -117,22 +117,7 @@ float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool
 	return (((gs->turn - 1) % gs->nplayers) ? -1.0 * gs->turn : gs->turn);
 }
 
-size_t eightMoveCount(const struct plist* const restrict pl)
-{
-	size_t i, nump;
-	const struct play* restrict play;
-
-	assert(pl);
-
-	for(i = 0, nump = pl->n + 1; i < pl->n; i++) {
-		play = plistGet(pl, i);
-		if(unlikely(getVal(play->c[play->n-1]) == 8))
-			nump += 3;
-	}
-	return nump;
-}
-
-size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp, const suit_t forces, const struct aistate* const restrict as, uint_fast32_t (*aif)(const struct aistate* const restrict), void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
+__attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp, const suit_t forces, const struct aistate* const restrict as, uint_fast32_t (*aif)(const struct aistate* const restrict), void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
 {
 	size_t i, ret = 0;
 	float grv;		// Win/lose distance
@@ -179,6 +164,21 @@ size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp,
 	return ret;
 }
 
+__attribute__((hot,pure,nonnull)) static size_t eightMoveCount(const struct plist* const restrict pl)
+{
+	size_t i, nump;
+	const struct play* restrict play;
+
+	assert(pl);
+
+	for(i = 0, nump = pl->n + 1; i < pl->n; i++) {
+		play = plistGet(pl, i);
+		if(unlikely(getVal(play->c[play->n-1]) == 8))
+			nump += 3;
+	}
+	return nump;
+}
+
 static void initMsgQueue(mqd_t* const restrict mq, char* const restrict mqname, const size_t ncpu)
 {
 	struct mq_attr mqa;
@@ -201,8 +201,8 @@ static void initMoveMap(size_t* const restrict emap, const struct plist* const p
 	size_t i, j, m;
 	const struct play* play;
 
-	assert(emap);
-	assert(pl);
+	{	assert(emap);
+		assert(pl);}
 
 	for(i = 0, m = 0; i < pl->n; i++) {
 		play = plistGet(pl, i);

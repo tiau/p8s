@@ -54,27 +54,6 @@ void initGameStateHypoShared(struct gamestate* const restrict gs,
 							 const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));
 
-void initGameStateHypothetical(struct gamestate* const restrict gs,
-							   const struct gamestate* const restrict ogs)
-	__attribute__((hot,nonnull));
-
-float gameLoopHypothetical(struct gamestate* const restrict gs,
-						   bool eight,
-						   bool magic,
-						   uint_fast32_t (*aif)(const struct aistate* const restrict))
-	__attribute__((hot,pure,nonnull));
-
-size_t eightMoveCount(const struct plist* const restrict pl)
-	__attribute__((hot,pure,nonnull));
-
-size_t playHypoGames(const size_t ngames,
-					 const struct play* const restrict gtp,
-					 const suit_t forces,
-					 const struct aistate* const restrict as,
-					 uint_fast32_t (*aif)(const struct aistate* const restrict),
-					 void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
-	__attribute__((hot,nonnull(5,6)));
-
 uint_fast32_t pctmRun(const struct aistate* const restrict as,
 					  void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict),
 					  uint_fast32_t (*aif)(const struct aistate* const restrict))

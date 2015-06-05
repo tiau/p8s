@@ -18,7 +18,7 @@ void freeMTable(struct mTable* const restrict mt)
 	free(mt);
 }
 
-__attribute__((nonnull,hot)) inline static void addMTable(struct mTable* const restrict mt, const card_t b)
+__attribute__((nonnull,hot)) static void addMTable(struct mTable* const restrict mt, const card_t b)
 {
 	{	assert(mt);
 		assert(b > 0 && b <= DECKLEN);}
@@ -29,7 +29,7 @@ __attribute__((nonnull,hot)) inline static void addMTable(struct mTable* const r
 	}
 }
 
-__attribute__((nonnull,hot)) inline static void handleEights(bool (* const restrict v)[52], card_t c)
+__attribute__((nonnull,hot)) static void handleEights(bool (* const restrict v)[52], card_t c)
 {
 	size_t i;
 

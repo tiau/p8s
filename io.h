@@ -18,9 +18,11 @@
 /* Go back two spaces */
 #define ANSI_BACK		"\033[1D\033[1D"
 
-void showSuit(const suit_t c) __attribute__((cold));
+void showSuit(const suit_t c)
+	__attribute__((cold));
 
-void showCard(const card_t c) __attribute__((cold));
+void showCard(const card_t c)
+	__attribute__((cold));
 
 void showPlay(const struct play* const restrict play)
 	__attribute__((nonnull,cold));
@@ -28,9 +30,11 @@ void showPlay(const struct play* const restrict play)
 void showHand(const struct player* const restrict player)
 	__attribute__((nonnull,cold));
 
-void showDeck(const struct deck* const deck) __attribute__((nonnull,cold));
+void showDeck(const struct deck* const deck)
+	__attribute__((nonnull,cold));
 
-void showPile(const struct deck* const pile) __attribute__((nonnull,cold));
+void showPile(const struct deck* const pile)
+	__attribute__((nonnull,cold));
 
 void showGameState(const struct gamestate* const restrict gs)
 	__attribute__((nonnull,cold));

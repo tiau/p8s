@@ -18,9 +18,9 @@ void dealStateSans(struct gamestate* const restrict gs, const struct gamestate* 
 				assert(false);
 
 	{	assert(gs->players[0].n);
-		assert(gs->players[0].n < DECKLEN);
+		assert(gs->players[0].n + 1 < DECKLEN);
 		assert(gs->players[1].n);
-		assert(gs->players[1].n < DECKLEN);}
+		assert(gs->players[1].n + 1 < DECKLEN);}
 }
 
 void initGameStateHypoShared(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
@@ -236,7 +236,7 @@ static void sendPlay(const struct pctmstate* const restrict s, const size_t play
 	assert(s);
 	assert(dead);
 
-#if HAPPYVALGRIND
+#if HAPPYHELGRIND
 	if(dead[rplay])
 #else
 	/* We don't lock for trials here since it's not really important if we get

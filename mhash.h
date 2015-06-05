@@ -12,9 +12,11 @@ struct mTable {
 };
 
 /* N.B. Caller must freeMTable return value */
-struct mTable* initMTable(void) __attribute__((malloc,hot,returns_nonnull));
+struct mTable* initMTable(void)
+	__attribute__((malloc,hot,returns_nonnull));
 
-void freeMTable(struct mTable* const restrict mt) __attribute__((nonnull,hot));
+void freeMTable(struct mTable* const restrict mt)
+	__attribute__((nonnull,hot));
 
 void addMove(struct mTable* const restrict mt,
 			 const struct play* const restrict play)

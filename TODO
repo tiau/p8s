@@ -1,2 +1,3 @@
+- Make cheat smarter, maybe a sub-AI that randomly chooses from the okay and better moves
 - Change mhash back to a hashtable to see if faster
 - Switch monte to C11 atomics to see if faster

@@ -1,8 +1,7 @@
 #include "judge.h"
 
 // TODO: tune tunables all throughout this function and evalPlay
-int_fast16_t evalPlayer(const struct player* const restrict player,
-						const size_t nplayers)
+int_fast16_t evalPlayer(const struct player* const restrict player, const size_t nplayers)
 {
 	size_t i, run = 0, mr = 0;
 	int_fast16_t ret = 0;
@@ -108,10 +107,7 @@ int_fast16_t evalPlayer(const struct player* const restrict player,
 	return ret;
 } __attribute__((hot,pure,nonnull))
 
-int_fast16_t evalPlay(const struct play* const restrict play,
-					  const size_t nplayers,
-					  const size_t* const restrict cih,
-					  const suit_t bestsuit)
+int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplayers, const size_t* const restrict cih, const suit_t bestsuit)
 {
 	size_t i;
 	int_fast16_t ret = 0;

@@ -13,7 +13,8 @@ struct plist {
 	struct plist* next;
 };
 
-struct plist* plistNew(void) __attribute__((hot,malloc,returns_nonnull));
+struct plist* plistNew(void)
+	__attribute__((hot,malloc,returns_nonnull));
 
 void plistAdd(struct plist* const pl, const struct play* const restrict play)
 	__attribute__((hot,nonnull));
@@ -21,6 +22,7 @@ void plistAdd(struct plist* const pl, const struct play* const restrict play)
 const struct play* plistGet(const struct plist* const pl, const size_t i)
 	__attribute__((hot,nonnull,pure,returns_nonnull));
 
-void plistDel(struct plist* head) __attribute__((nonnull));
+void plistDel(struct plist* head)
+	__attribute__((nonnull));
 
 #endif /* PLIST_H */

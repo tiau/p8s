@@ -22,7 +22,7 @@
 /* Changing this to true will prevent helgrind (drd doesn't seem to care) from
  * complaining about sendPlay() and monteThread() having data races.  They do,
  * but not in a way that matters. */
-#define HAPPYVALGRIND false
+#define HAPPYHELGRIND false
 
 /* Number of bytes sent per pipe message */
 #define BUFSZ 18

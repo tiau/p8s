@@ -15,11 +15,6 @@
 #define BADPNUM 2
 #define BADGNUM 3
 
-void gameLoop(struct gamestate* const restrict gs, const uint8_t verbose)
-	__attribute__((cold,nonnull));
-
-void sigintQueueClean(int sig) __attribute__((cold,noreturn));
-
 int main(int argc, char* argv[]) __attribute__((cold));
 
 #endif /* P8_H */

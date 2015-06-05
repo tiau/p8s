@@ -6,7 +6,9 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-void cshuffle(card_t* const restrict cards, const size_t s, const size_t e)
+void cshuffle(card_t* const restrict cards,
+			  const size_t s,
+			  const size_t e)
 	__attribute__((hot,nonnull));
 
 void populateCIH(const struct gamestate* const restrict gs,
@@ -46,13 +48,13 @@ bool playerDrawCard(struct gamestate* const gs,
 bool drawCard(struct gamestate* const restrict gs)
 	__attribute__((nonnull));
 
-__attribute__((hot,const)) inline static bool isMagicCard(const card_t c)
+__attribute__((hot,const)) inline static bool isMagicCard(card_t c)
 {
 	{	assert(c);
 		assert(c <= DECKLEN);}
 
-	const unsigned int v = getVal(c);
-	return v == 2 || v == 3;
+	c = getVal(c);
+	return c == 2 || c == 3;
 }
 
 #endif /* ENGINE_H */

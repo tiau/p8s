@@ -1,12 +1,6 @@
 #include "p8.h"
 
-inline static size_t stateToAiNumber(const struct gamestate* const restrict gs)
-{
-	assert(gs);
-	return gs->ai[gs->turn % gs->nplayers];
-}
-
-void gameLoop(struct gamestate* const restrict gs, const uint8_t verbose)
+__attribute__((cold,nonnull)) static void gameLoop(struct gamestate* const restrict gs, const uint8_t verbose)
 {
 	size_t i;
 	const struct play* play;
@@ -64,7 +58,7 @@ void gameLoop(struct gamestate* const restrict gs, const uint8_t verbose)
 						showPlay(plistGet(as.pl, i));
 					printf("%s \n", ANSI_BACK);
 				}
-				ptm = (*ais[stateToAiNumber(gs)])(&as);
+				ptm = (*ais[gs->ai[gs->turn % gs->nplayers]])(&as);
 			} else {
 				MPACK(ptm, 0);
 			}
@@ -117,7 +111,7 @@ void gameLoop(struct gamestate* const restrict gs, const uint8_t verbose)
 	}
 }
 
-void sigintQueueClean(int sig)
+__attribute__((cold,noreturn)) static void sigintQueueClean(int sig)
 {
 	char pidstr[12];
 	const pid_t pid = getpid();

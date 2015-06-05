@@ -2,7 +2,7 @@
 #include "../defines.h"
 #include "../io.h"
 #include "monte.h"
-#include "mimic.h"
+#include "stacked.h"
 
 /* The Human AI isn't an AI at all.  It asks the user what play it should make.
  * The user must first enter a number to select which play to make.  If said

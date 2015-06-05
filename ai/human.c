@@ -65,10 +65,10 @@ uint_fast32_t human(const struct aistate* const restrict as)
 		if(*b == 'd')
 			return ret;
 		if(*b == '?') {
-			tm = aiMimic(as);
+			tm = aiStacked(as);
 			tm = MUPACK(tm);
 			if(tm != as->pl->n) {
-				printf("Mimic Carlo recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
+				printf("Stacked recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
 				showPlay(plistGet(as->pl, tm));
 				printf("%s \n", ANSI_BACK);
 			}
@@ -78,7 +78,7 @@ uint_fast32_t human(const struct aistate* const restrict as)
 			tm = aiMonte(as);
 			tm = MUPACK(tm);
 			if(tm != as->pl->n) {
-				printf("Monte Carlo recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
+				printf("Monte recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
 				showPlay(plistGet(as->pl, tm));
 				printf("%s \n", ANSI_BACK);
 			}

@@ -41,20 +41,19 @@ void initGameStateHypothetical(struct gamestate* const restrict gs, const struct
 	dealStateSans(gs, ogs);
 	gs->turn = 0;
 	gs->eightSuit = ogs->eightSuit;
-	gs->ai = NULL;
-	gs->drew = false;
+	gs->drew = ogs->drew;
 	gs->magic = false;
 	{	assert(gs->pile.n);
 		assert(gs->pile.n < DECKLEN);
 		assert(gs->deck.n < DECKLEN);}
 }
 
-float gameLoopHypothetical(struct gamestate* const restrict gs, const bool eight, const bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
+float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
 {
 	size_t airv = 0, t;
 	const struct play* play;
 	struct aistate as = { .gs = gs };
-	bool ess = eight, drew, hasMagic = magic;
+	bool drew;
 	card_t tc;
 
 	{	assert(gs);
@@ -63,12 +62,12 @@ float gameLoopHypothetical(struct gamestate* const restrict gs, const bool eight
 		assert(gs->nplayers >= MINPLRS && gs->nplayers <= MAXPLRS);}
 
 	while(getGameState(gs)) {
-		if(!ess) gs->eightSuit = UNKNOWN;
+		if(!eight) gs->eightSuit = UNKNOWN;
 		drew = !gs->deck.n;
 
-		if(unlikely(hasMagic)) {
+		if(unlikely(magic)) {
 			tc = getVal(*gs->pile.top);
-			hasMagic = false;
+			magic = false;
 
 			if(tc == 2) {
 				drawCard(gs);
@@ -97,11 +96,11 @@ float gameLoopHypothetical(struct gamestate* const restrict gs, const bool eight
 			t = MUPACK(airv);
 			if(t != as.pl->n) {
 				play = plistGet(as.pl, t);
-				ess = (getVal(play->c[play->n-1]) == 8);
+				eight = (getVal(play->c[play->n-1]) == 8);
 				makeMove(gs, play);
-				if(ess)
+				if(eight)
 					gs->eightSuit = ESUPACK(airv);
-				hasMagic = isMagicCard(*gs->pile.top);
+				magic = isMagicCard(*gs->pile.top);
 			}
 		} else {
 			if(!drew)
@@ -176,21 +175,21 @@ size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp,
 	return ret;
 }
 
-static void initMsgQueue(mqd_t* const restrict mq, char* const restrict pidstr, const size_t ncpu)
+static void initMsgQueue(mqd_t* const restrict mq, char* const restrict mqname, const size_t ncpu)
 {
 	struct mq_attr mqa;
-	const pid_t pid = getpid();	// PID for use in our MQ name
+	const pid_t pid = getpid();	// PID for MQ name so multiple simultaneous p8s don't clash
 
 	{	assert(mq);
-		assert(pidstr);
+		assert(mqname);
 		assert(ncpu);}
 
 	mqa.mq_flags = 0;
 	mqa.mq_maxmsg = ncpu;
 	mqa.mq_msgsize = BUFSZ;
-	snprintf(pidstr, 12, "/p8s-%i", pid);
-	if((*mq = mq_open(pidstr, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, &mqa)) == -1)
-		fprintf(stderr, "%s: Cannot open message queue %s\n", __func__, pidstr);
+	snprintf(mqname, 12, "/p8s-%i", pid);
+	if((*mq = mq_open(mqname, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, &mqa)) == -1)
+		fprintf(stderr, "%s: Cannot open message queue %s\n", __func__, mqname);
 }
 
 static void initMoveMap(size_t* const restrict emap, const struct plist* const pl)
@@ -226,18 +225,25 @@ static void launchThreads(pthread_t* const restrict threads, const size_t ncpu, 
 			fprintf(stderr, "%s: Cannot create game thread %zu of %zu\n", __func__, i, ncpu);
 }
 
-static void sendPlay(const mqd_t* const restrict mq, const size_t play, const size_t rplay, const suit_t suit, const size_t hmg, const bool* const restrict dead)
+static void sendPlay(const struct pctmstate* const restrict s, const size_t play, const size_t rplay, const suit_t suit, const size_t hmg, const bool* const restrict dead)
 {
-	char buf[BUFSZ];
+	static char buf[BUFSZ];
 
-	assert(mq);
+	assert(s);
 	assert(dead);
 
+#if HAPPYVALGRIND
 	if(dead[rplay])
+#else
+	/* We don't lock for trials here since it's not really important if we get
+	 * a lower-than-actual number; we'd waste more time locking and the worst
+	 * outcome is that we play a few more games than we needed to. */
+	if(dead[rplay] || s->trials[rplay] >= MAXGAMES)
+#endif
 		return;
 
 	snprintf(buf, BUFSZ, "p%4zu %4zu %1u %4zu", play, rplay, suit, hmg);
-	mq_send(*mq, buf, 18, 1);
+	mq_send(*s->mq, buf, 18, 1);
 }
 
 __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* const restrict s, const size_t ncpu)
@@ -246,7 +252,6 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 	const struct play* restrict play;
 	const size_t nump = s->nplays;
 	size_t hmg = 20;	// How many games to play the first round
-	size_t maxg = 9999;	// Max games to play
 	bool dead[nump];
 	float scores[nump];
 	float best, ath, co;
@@ -265,12 +270,12 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 					play = plistGet(s->as->pl, i);
 					if(unlikely(getVal(play->c[play->n-1]) == 8)) {
 						for(j = CLUBS; j <= SPADES; j++)
-							sendPlay(s->mq, i, m++, j, hmg, dead);
+							sendPlay(s, i, m++, j, hmg, dead);
 					} else {
-						sendPlay(s->mq, i, m++, UNKNOWN, hmg, dead);
+						sendPlay(s, i, m++, UNKNOWN, hmg, dead);
 					}
 				}
-				sendPlay(s->mq, i, m, UNKNOWN, hmg, dead);
+				sendPlay(s, i, m, UNKNOWN, hmg, dead);
 			}
 			hmg += hmg / 8;
 			usleep(4000);
@@ -298,11 +303,11 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				continue;
 			// TODO tune these floats
 			co = 6.1*log(ath)/pow((double)ath, 1.1);
-			if(best - scores[j] > co || tt > maxg || act == 1) {
+			if(best - scores[j] > co || tt > MAXGAMES || act == 1) {
 				dead[j] = true;
 				act--;
 #ifdef MONTE_VERBOSE
-				printf("%smonte:%s p %zu\t(%.1f%% :: %.1f / %.1f)\t%.1f%%\t", ANSI_CYAN, ANSI_DEFAULT, j, 100.0*((float)tt) / (float)maxg, 100.0* (best - scores[j]), 100.0*co, 100.0*scores[j]);
+				printf("%smonte:%s  %zu\t(%.1f%% :: %.1f / %.1f)\t%.1f%%\t", ANSI_CYAN, ANSI_DEFAULT, j, 100.0*((float)tt) / (float)MAXGAMES, 100.0* (best - scores[j]), 100.0*co, 100.0*scores[j]);
 				if(j+1 == nump)
 					printf("(%s)  ", ((s->as->gs->drew) ? "pass" : "draw"));
 				else
@@ -335,7 +340,9 @@ __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 		assert(s->wins);
 		assert(s->trials);
 		assert(s->emap);
-		assert(s->as->gs->nplayers >= MINPLRS && s->as->gs->nplayers <= MAXPLRS);}
+		assert(s->as->gs->nplayers >= MINPLRS && s->as->gs->nplayers <= MAXPLRS);
+		assert(s->aif);
+		assert(s->initgs);}
 
 	for(bool done = false; !done;) {
 		if(unlikely((br = mq_receive(*s->mq, tbuf, BUFSZ, NULL)) == -1)) {
@@ -359,7 +366,7 @@ __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 				ngames = atoi(tbuf+13);
 				ti = ngames;
 				gtp = unlikely(wp == s->as->pl->n) ? NULL : plistGet(s->as->pl, wp);
-				tt = playHypoGames(ngames, gtp, forces, s->as, MONTEAIF, initGameStateHypothetical);
+				tt = playHypoGames(ngames, gtp, forces, s->as, s->aif, s->initgs);
 				pthread_rwlock_wrlock(s->rwl);
 				s->wins[bucket] += tt;
 				s->trials[bucket] += ti;
@@ -377,13 +384,13 @@ __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 	return NULL;
 }
 
-static void threadsDone(const size_t nthr, pthread_t* const restrict threads, mqd_t* const restrict mq, const char* const restrict pidstr)
+static void threadsDone(const size_t nthr, pthread_t* const restrict threads, mqd_t* const restrict mq, const char* const restrict mqname)
 {
 	size_t i;
 
 	{	assert(threads);
 		assert(mq);
-		assert(pidstr);}
+		assert(mqname);}
 
 	for(i = 0; i < nthr; i++)
 		if(unlikely(mq_send(*mq, "q\0", 2, 2) == -1))
@@ -396,7 +403,7 @@ static void threadsDone(const size_t nthr, pthread_t* const restrict threads, mq
 	if(unlikely(mq_close(*mq)))
 		fprintf(stderr, "%s: Failed to close message queue\n", __func__);
 
-	if(unlikely(mq_unlink(pidstr)))
+	if(unlikely(mq_unlink(mqname)))
 		fprintf(stderr, "%s: Failed to unlink message queue\n", __func__);
 }
 
@@ -430,7 +437,7 @@ static uint_fast32_t findBest(const struct pctmstate* const restrict s)
 	return ret;
 }
 
-uint_fast32_t aiMonte(const struct aistate* const restrict as)
+uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict), uint_fast32_t (*aif)(const struct aistate* const restrict))
 {
 	{	assert(as);
 		assert(as->gs);
@@ -438,29 +445,33 @@ uint_fast32_t aiMonte(const struct aistate* const restrict as)
 		assert(as->pl->n);
 		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
 
-	// How many moves we have counting 8-ending plays as 4-in-1 and draw/pass
+	/* How many moves we have counting 8-ending plays as 4-in-1 and draw/pass
+	 * as a move.  emap / initMoveMap() allow us to map from one number to the
+	 * play number and eight suit that we are expected to return. */
 	const size_t nump = eightMoveCount(as->pl);
 	const size_t ncpu = sysconf(_SC_NPROCESSORS_ONLN) + 1;
-
-	size_t emap[nump];		// For mapping back to get es
-	size_t wins[nump];		// Wins for each play
-	size_t trials[nump];	// Trials for each play
+	size_t emap[nump];
+	size_t wins[nump];
+	size_t trials[nump];
 	pthread_rwlock_t rwl;
-	char pidstr[12];		// MQ name string
+	char mqname[12];
 	pthread_t threads[ncpu];
 	mqd_t mq;
 
 	memset(wins, 0, sizeof(size_t)*nump);
 	memset(trials, 0, sizeof(size_t)*nump);
 	pthread_rwlock_init(&rwl, NULL);
-	initMsgQueue(&mq, pidstr, ncpu);
+	initMsgQueue(&mq, mqname, ncpu);
 	initMoveMap(emap, as->pl);
-	struct pctmstate pcs = { as, nump, trials, wins, emap, &mq, &rwl };
-
+	struct pctmstate pcs = { as, nump, trials, wins, emap, &mq, &rwl, aif, initgs };
 	launchThreads(threads, ncpu, monteThread, &pcs);
 	controlThread(&pcs, ncpu);
-	threadsDone(ncpu, threads, &mq, pidstr);
-
+	threadsDone(ncpu, threads, &mq, mqname);
 	pthread_rwlock_destroy(&rwl);
 	return findBest(&pcs);
+}
+
+uint_fast32_t aiMonte(const struct aistate* const restrict as)
+{
+	return pctmRun(as, initGameStateHypothetical, MONTEAIF);
 }

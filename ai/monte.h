@@ -19,11 +19,19 @@
 #ifndef AI_MONTE_H
 #define AI_MONTE_H
 
+/* Changing this to true will prevent helgrind (drd doesn't seem to care) from
+ * complaining about sendPlay() and monteThread() having data races.  They do,
+ * but not in a way that matters. */
+#define HAPPYVALGRIND false
+
 /* Number of bytes sent per pipe message */
 #define BUFSZ 18
 
 /* What AI to call to play hypothetical games */
 #define MONTEAIF aiJudge
+
+/* Maximum number of hypothetical games to play for a each possible move */
+#define MAXGAMES 9999
 
 /* Extra state for producer-consumer thread model */
 struct pctmstate {
@@ -31,9 +39,11 @@ struct pctmstate {
 	const size_t nplays;		// How many different plays we're considering
 	size_t* const trials;		// How many trials we've run for each play
 	size_t* const wins;			// ... wins ...
-	const size_t* const emap;	// Map for 8-ending plays
+	const size_t* const emap;	// Map for 8-ending plays, see pctmRun()
 	const mqd_t* const mq;
 	pthread_rwlock_t* const rwl;
+	uint_fast32_t (*aif)(const struct aistate* const restrict);
+	void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict);
 };
 
 void dealStateSans(struct gamestate* const restrict gs,
@@ -45,8 +55,8 @@ void initGameStateHypothetical(struct gamestate* const restrict gs,
 	__attribute__((hot,nonnull));
 
 float gameLoopHypothetical(struct gamestate* const restrict gs,
-						   const bool eight,
-						   const bool magic,
+						   bool eight,
+						   bool magic,
 						   uint_fast32_t (*aif)(const struct aistate* const restrict))
 	__attribute__((hot,pure,nonnull));
 
@@ -60,6 +70,11 @@ size_t playHypoGames(const size_t ngames,
 					 uint_fast32_t (*aif)(const struct aistate* const restrict),
 					 void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
 	__attribute__((hot,nonnull(5,6)));
+
+uint_fast32_t pctmRun(const struct aistate* const restrict as,
+					  void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict),
+					  uint_fast32_t (*aif)(const struct aistate* const restrict))
+	__attribute__((hot,pure,nonnull));
 
 uint_fast32_t aiMonte(const struct aistate* const restrict as)
 	__attribute__((hot,pure,nonnull));

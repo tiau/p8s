@@ -6,16 +6,15 @@
 #include "ai/judge.h"
 #include "ai/draw.h"
 #include "ai/monte.h"
-#include "ai/mimic.h"
+#include "ai/stacked.h"
 #include "ai/cheat.h"
 
 #ifndef AI_H
 #define AI_H
 
-/* Number of AIs (counting human) */
+/* Number of AIs, counting human */
 #define NAI 9
 
-/* Function pointer arrays for AIs */
 static uint_fast32_t (*ais[NAI])(const struct aistate* const restrict) =
 {
 	&human,		// 0
@@ -25,7 +24,7 @@ static uint_fast32_t (*ais[NAI])(const struct aistate* const restrict) =
 	&aiJudge,	// 4
 	&aiDraw,	// 5
 	&aiMonte,	// 6
-	&aiMimic,	// 7
+	&aiStacked,	// 7
 	&aiCheat	// 8
 };
 

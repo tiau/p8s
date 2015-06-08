@@ -286,7 +286,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 		}
 
 		pthread_rwlock_rdlock(s->rwl);
-		best = 0.0;
+		best = -1.0;
 		btn = 0;
 		for(j = 0; j < nump; j++) {
 			if(dead[j])

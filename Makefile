@@ -12,7 +12,7 @@ PFLAGS := -fprofile-correction -fprofile-use -funroll-loops -funswitch-loops -fb
 TFLAGS := -pg -g -fprofile-arcs -ftest-coverage
 NRAND := -DNORANDOM
 
-FILES := engine.c io.c mhash.c movegen.c p8.c plist.c poker.c util.c
+FILES := engine.c io.c mhash.c movegen.c p8.c plist.c poker.c
 AIS := ai/human.c ai/first.c ai/random.c ai/shedder.c ai/monte.c ai/judge.c ai/stacked.c ai/draw.c ai/cheat.c
 FAI := ${FILES} ${AIS}
 

@@ -4,9 +4,12 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-int cmpcardt(const void* const c1, const void* const c2)
-	__attribute__((hot,pure,nonnull));
-
+__attribute__((hot,pure,nonnull)) int cmpcardt(const void* const c1, const void* const c2)
+{
+	{	assert(c1);
+		assert(c2);}
+	return *((const card_t* const)c1) - *((const card_t* const)c2);
+}
 
 __attribute__((hot,const,always_inline))
 inline static suit_t getSuit(const card_t c)

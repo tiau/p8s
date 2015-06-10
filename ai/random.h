@@ -8,6 +8,6 @@
 #define AI_RANDOM_H
 
 uint_fast32_t aiRandom(const struct aistate* const restrict as)
-	__attribute__((pure,nonnull));
+	__attribute__((nonnull));
 
 #endif /* AI_RANDOM_H */

@@ -184,9 +184,6 @@ int main(int argc, char* argv[])
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	srand(tv.tv_sec + tv.tv_usec);
-#ifdef NORANDOM
-	srand(0);
-#endif
 
 	signal(SIGINT, sigintQueueClean);
 #ifndef NDEBUG

@@ -187,7 +187,11 @@ int main(int argc, char* argv[])
 #ifdef NORANDOM
 	srand(0);
 #endif
+
 	signal(SIGINT, sigintQueueClean);
+#ifndef NDEBUG
+	signal(SIGABRT, sigintQueueClean);
+#endif
 
 	struct gamestate gs;
 	for(i = 0; i < ngames; i++) {

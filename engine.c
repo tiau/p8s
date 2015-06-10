@@ -8,7 +8,7 @@ void populateCIH(const struct gamestate* const restrict gs, size_t* const restri
 		assert(cih);}
 
 	/* The player after the current player always occupies the first slot */
-	for(i = ((gs->turn % gs->nplayers) + 1) % gs->nplayers,	j = 0; j < gs->nplayers; i = (i + 1) % gs->nplayers, j++)
+	for(i = (gs->turn + 1) % gs->nplayers,	j = 0; j < gs->nplayers; i = (i + 1) % gs->nplayers, j++)
 		cih[j] = (i != (gs->turn % gs->nplayers)) ? gs->players[i].n : 0;
 
 	assert(cih[0]);

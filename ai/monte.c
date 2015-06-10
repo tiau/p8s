@@ -52,7 +52,7 @@ __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamest
 	dealStateSans(gs, ogs);
 }
 
-__attribute__((hot,pure,nonnull)) static float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
+__attribute__((hot,nonnull)) static float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
 {
 	size_t airv = 0, t;
 	const struct play* play;
@@ -351,6 +351,7 @@ __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 	for(bool done = false; !done;) {
 		if(unlikely((br = mq_receive(*s->mq, tbuf, BUFSZ, NULL)) == -1)) {
 			fprintf(stderr, "%s: Could not receive message\n", __func__);
+			usleep(50000);
 			continue;
 		}
 

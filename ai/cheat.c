@@ -2,14 +2,15 @@
 
 void initCheatGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
+	size_t i, j;
+
 	assert(ogs);
 
 	initGameStateHypoShared(gs, ogs);
 	gs->deck = ogs->deck;
 	gs->deck.top = gs->deck.c + (ogs->deck.top - ogs->deck.c);
-	for(size_t i = 0; i < gs->nplayers; i++)
-		gs->players[i] = ogs->players[i];
-	gs->turn = ogs->turn;
+	for(i = ogs->turn % gs->nplayers, j = 0; j < gs->nplayers; i = (i + 1) % gs->nplayers, j++)
+		gs->players[j] = ogs->players[i];
 }
 
 uint_fast32_t aiCheat(const struct aistate* const restrict as)

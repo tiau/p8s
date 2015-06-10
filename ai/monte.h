@@ -57,7 +57,7 @@ void initGameStateHypoShared(struct gamestate* const restrict gs,
 uint_fast32_t pctmRun(const struct aistate* const restrict as,
 					  void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict),
 					  uint_fast32_t (*aif)(const struct aistate* const restrict))
-	__attribute__((hot,pure,nonnull));
+	__attribute__((hot,nonnull));
 
 uint_fast32_t aiMonte(const struct aistate* const restrict as)
 	__attribute__((hot,pure,nonnull));

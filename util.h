@@ -4,7 +4,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-__attribute__((hot,pure,nonnull)) int cmpcardt(const void* const c1, const void* const c2)
+__attribute__((hot,pure,nonnull)) static int cmpcardt(const void* const c1, const void* const c2)
 {
 	{	assert(c1);
 		assert(c2);}

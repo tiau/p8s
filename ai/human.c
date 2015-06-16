@@ -13,7 +13,7 @@ __attribute__((cold)) inline static uint_fast8_t humanCardHash(const struct play
 
 uint_fast32_t human(const struct aistate* const restrict as)
 {
-	uint_fast32_t tm, ret = 0;
+	uint_fast32_t tm = 0, ret = 0;
 	size_t i, dc;
 	struct player lp;
 	const struct play* play;
@@ -64,21 +64,16 @@ uint_fast32_t human(const struct aistate* const restrict as)
 		MPACK(ret, as->pl->n);
 		if(*b == 'd')
 			return ret;
-		if(*b == '?') {
+		if(*b == 'h')
 			tm = aiStacked(as);
-			tm = MUPACK(tm);
-			if(tm != as->pl->n) {
-				printf("Stacked recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
-				showPlay(plistGet(as->pl, tm));
-				printf("%s \n", ANSI_BACK);
-			}
-			continue;
-		}
-		if(*b == 'h') {
+		if(*b == 'H')
+			tm = aiCheat(as);
+		if(*b == '?')
 			tm = aiMonte(as);
+		if(*b == 'h' || *b == 'H' || *b == '?') {
 			tm = MUPACK(tm);
 			if(tm != as->pl->n) {
-				printf("Monte recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
+				printf("AI recommends\t%s%zu%s :: ", ANSI_WHITE, tm, ANSI_DEFAULT);
 				showPlay(plistGet(as->pl, tm));
 				printf("%s \n", ANSI_BACK);
 			}

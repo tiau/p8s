@@ -22,8 +22,7 @@ void plistAdd(struct plist* const pl, const struct play* const restrict play)
 		t->n++;
 	t->n++;
 
-	if(t->sz == PLNODESIZE) {
-		/* All slots full, need to create a new node */
+	if(t->sz == PLNODESIZE) { // All slots full, need to create a new node
 		ret = plistNew();
 		ret->plays[0] = *play;
 		ret->sz = 1;

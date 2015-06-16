@@ -37,7 +37,7 @@ __attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* c
 	return true;
 }
 
-__attribute__((pure,nonnull,hot)) static struct play* nextSlot(const struct mTable* const restrict mt, const struct play* const restrict play)
+__attribute__((pure,nonnull,hot)) static const struct play* nextSlot(const struct mTable* const restrict mt, const struct play* const restrict play)
 {
 	const struct play* t;
 
@@ -50,7 +50,7 @@ __attribute__((pure,nonnull,hot)) static struct play* nextSlot(const struct mTab
 			return NULL;
 		t = (t - mt->table > MT_SIZE) ? mt->table : t + 1;
 	}
-	return (struct play*)t;
+	return t;
 }
 
 void initMTable(struct mTable* const restrict mt)
@@ -68,7 +68,7 @@ void addMove(struct mTable* const restrict mt, const struct play* const restrict
 	{	assert(mt);
 		assert(play);}
 
-	t = nextSlot(mt, play);
+	t = (struct play*)nextSlot(mt, play);
 	if(t)
 		*t = *play;
 }

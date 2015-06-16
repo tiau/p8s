@@ -69,14 +69,6 @@ inline static void orderHand(struct player* const restrict player)
 	qsort(player->c, player->n, sizeof(card_t), cmpcardt);
 }
 
-__attribute__((hot,nonnull))
-inline static void orderPlay(struct play* const restrict play)
-{
-	{	assert(play);
-		assert(play->n);}
-	qsort(play->c, play->n, sizeof(card_t), cmpcardt);
-}
-
 __attribute__((nonnull,returns_nonnull))
 inline static struct player* stateToPlayer(const struct gamestate* const restrict gs)
 {

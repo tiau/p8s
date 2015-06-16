@@ -33,7 +33,7 @@ __attribute__((nonnull,hot)) static void permutator(const size_t k, const struct
 		play.c[i] = player->c[is[i+1]];
 
 	if(isPlayLegal(&play)) {
-		orderPlay(&play);
+		qsort(play.c, play.n, sizeof(card_t), cmpcardt);
 		if(isCardOneLegal(gs, &play) && !lookupMove(mt, &play)) {
 			addMove(mt, &play);
 			plistAdd(pl, &play);

@@ -4,7 +4,8 @@ void initCheatGameStateHypothetical(struct gamestate* const restrict gs, const s
 {
 	size_t i, j;
 
-	assert(ogs);
+	{	assert(gs);
+		assert(ogs);}
 
 	initGameStateHypoShared(gs, ogs);
 	gs->deck = ogs->deck;
@@ -16,8 +17,8 @@ void initCheatGameStateHypothetical(struct gamestate* const restrict gs, const s
 uint_fast32_t aiCheat(const struct aistate* const restrict as)
 {
 	/* Since Cheat does no randomization, it needs to use a nondeterministic AI
-	 * so as not to run into the case where it just plays the same game over
-	 * and over.  Using aiRandom also allows it to more thoroughly explore its
-	 * vastly constricted state space. */
+	 * so as not to just plays the same game over and over.  Using aiRandom
+	 * also allows it to more thoroughly explore its vastly constricted state
+	 * space. */
 	return pctmRun(as, initCheatGameStateHypothetical, aiRandom);
 }

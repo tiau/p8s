@@ -52,6 +52,8 @@ __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamest
 	dealStateSans(gs, ogs);
 }
 
+/* This is mostly a duplication of gameLoop from p8s.c, it lacks all the
+ * checks for verbosity levels and should be a bit faster. */
 __attribute__((hot,nonnull)) static float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
 {
 	size_t airv = 0, t;

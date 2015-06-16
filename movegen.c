@@ -77,7 +77,7 @@ __attribute__((nonnull,hot)) static void recurserator(const size_t d, const size
 
 __attribute__((nonnull,hot)) static void nComboPermute(const struct gamestate* const restrict gs, const struct player* const restrict player, const size_t k, struct plist* const restrict ps)
 {
-	struct mTable* mt;
+	struct mTable mt;
 	ssize_t is[k + 2];
 	size_t i;
 
@@ -88,10 +88,9 @@ __attribute__((nonnull,hot)) static void nComboPermute(const struct gamestate* c
 	for(i = 0; i < k + 2; i++)
 		is[i] = k - i;
 
-	mt = initMTable();
+	initMTable(&mt);
 	/* Generate all k-permutations of all k-combinations of the player's hand */
-	recurserator(k, k, gs, player, ps, is, mt);
-	freeMTable(mt);
+	recurserator(k, k, gs, player, ps, is, &mt);
 }
 
 struct plist* getPotentials(const struct gamestate* const restrict gs, const struct player* const restrict player)

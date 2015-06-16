@@ -1,2 +1,1 @@
-- Change mhash back to a hashtable to see if faster
 - Switch monte to C11 atomics to see if faster

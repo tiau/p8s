@@ -32,6 +32,14 @@ loud: ${FAI}
 louder: ${FAI}
 	@CFLAGS="${CFLAGS} ${RFLAGS} -DJUDGE_VERBOSE" make debug
 
+proof: ${FAI} .knowngood
+	@CFLAGS="${CFLAGS} ${RFLAGS} -DNORANDOM" make debug
+	@./p8 -g99 -m4135 -vvv > out.tmp
+	@echo -e "\n"
+	diff .knowngood out.tmp
+	@echo -e "\n\n(No diff means everything works as before)\n"
+	@make clean
+
 includegraph: ${FAI}
 	echo -e "digraph {\n`grep -r include * | egrep -v README\|TODO\|Makefile\|ccglue\|cscope\|Binary\|\.c:# | sed -e 's/^\([^:]*\):[^\ ]*\ \(.*\)/"\1"->\2/g' -e 's/\.\.\///' -e 's/ai\///' -e 's/>\->/*>->/'`}" | xdot - &
 

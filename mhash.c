@@ -1,123 +1,82 @@
 #include "mhash.h"
 
-struct mTable* initMTable(void)
-{
-	return calloc(1, sizeof(struct mTable));
-}
-
-void freeMTable(struct mTable* const restrict mt)
+__attribute__((pure,nonnull,hot)) static uint_fast16_t mHash(const struct play* const restrict play)
 {
 	size_t i;
+	uint_fast16_t hash = 0;
 
+	hash = play->c[play->n-1];
+	hash <<= 8;
+	for(i = 0; i < play->n-1; i++)
+		hash ^= play->c[i];
+
+	return hash % MT_SIZE;
+}
+
+__attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* const restrict p1, const struct play* const restrict p2)
+{
+	size_t i, j;
+	size_t matches = 0;
+
+	{	assert(p1);
+		assert(p2);}
+
+	if(p1->n != p2->n || p1->c[p1->n-1] != p2->c[p1->n-1])
+		return false;
+
+	for(i = 0; i < p1->n - 1; i++) {
+		for(j = 0; j < p1->n - 1; j++) {
+			if(p1->c[i] == p2->c[j]) {
+				matches++;
+				break;
+			}
+		}
+		if(matches != i + 1) return false;
+	}
+
+	return true;
+}
+
+__attribute__((pure,nonnull,hot)) static struct play* nextSlot(const struct mTable* const restrict mt, const struct play* const restrict play)
+{
+	const struct play* t;
+
+	{	assert(mt);
+		assert(play);}
+
+	t = &mt->table[mHash(play)];
+	while(t->n) {
+		if(isEqualEnough(t, play)) // Play is already present
+			return NULL;
+		t = (t - mt->table > MT_SIZE) ? mt->table : t + 1;
+	}
+	return (struct play*)t;
+}
+
+void initMTable(struct mTable* const restrict mt)
+{
 	assert(mt);
 
-	for(i = 0; i < 52; i++)
-		if(mt->t[i])
-			freeMTable(mt->t[i]);
-
-	free(mt);
-}
-
-__attribute__((nonnull,hot)) static void addMTable(struct mTable* const restrict mt, const card_t b)
-{
-	{	assert(mt);
-		assert(b > 0 && b <= DECKLEN);}
-
-	if(!mt->t[b]) {
-		mt->t[b] = initMTable();
-		assert(mt->t[b]);
-	}
-}
-
-__attribute__((nonnull,hot)) static void handleEights(bool (* const restrict v)[52], card_t c)
-{
-	size_t i;
-
-	assert(v);
-
-	if(getVal(c) == 8)
-		for(i = 8; i <= 47; i += 13)
-			(*v)[i] = true;
+	memset(mt->table, 0, MT_SIZE * sizeof(struct play));
+	mt->n = 0;
 }
 
 void addMove(struct mTable* const restrict mt, const struct play* const restrict play)
 {
-	struct play l;
+	struct play* t;
 
 	{	assert(mt);
-		assert(play);
-		assert(play->n <= MAXCIP);}
+		assert(play);}
 
-	if(unlikely(play->n == 1))
-		return;
-
-	l.n = play->n - 1;
-	memcpy(l.c, play->c, sizeof(card_t)*play->n);
-	orderPlay(&l);
-
-	switch(play->n) {
-		case 2:
-			mt->v[l.c[0]] = true;
-			handleEights(&mt->v, l.c[0]);
-			break;
-		case 3:
-			addMTable(mt, l.c[0]);
-			mt->t[l.c[0]]->v[l.c[1]] = true;
-			handleEights(&mt->t[l.c[0]]->v, l.c[1]);
-			break;
-		case 4:
-			addMTable(mt, l.c[0]);
-			addMTable(mt->t[l.c[0]], l.c[1]);
-			mt->t[l.c[0]]->t[l.c[1]]->v[l.c[2]] = true;
-			handleEights(&mt->t[l.c[0]]->t[l.c[1]]->v, l.c[2]);
-			break;
-		case 5:
-			addMTable(mt, l.c[0]);
-			addMTable(mt->t[l.c[0]], l.c[1]);
-			addMTable(mt->t[l.c[0]]->t[l.c[1]], l.c[2]);
-			mt->t[l.c[0]]->t[l.c[1]]->t[l.c[2]]->v[l.c[3]] = true;
-			handleEights(&mt->t[l.c[0]]->t[l.c[1]]->t[l.c[2]]->v, l.c[3]);
-			break;
-	}
+	t = nextSlot(mt, play);
+	if(t)
+		*t = *play;
 }
 
 bool lookupMove(const struct mTable* const restrict mt, const struct play* const restrict play)
 {
-	struct play l;
-
 	{	assert(mt);
-		assert(play);
-		assert(play->n >= 1 && play->n <= MAXCIP);}
+		assert(play);}
 
-	if(unlikely(play->n == 1))
-		return false;
-
-	l.n = play->n - 1;
-	memcpy(l.c, play->c, sizeof(card_t)*play->n);
-	orderPlay(&l);
-
-	if(play->n >= 3)
-		if(!mt->t[l.c[0]])
-			return false;
-	if(play->n >= 4)
-		if(!mt->t[l.c[0]]->t[l.c[1]])
-			return false;
-	if(play->n >= 5)
-		if(!mt->t[l.c[0]]->t[l.c[1]]->t[l.c[2]])
-			return false;
-
-	switch(play->n) {
-		case 2:
-			return mt->v[l.c[0]];
-		case 3:
-			return mt->t[l.c[0]]->v[l.c[1]];
-		case 4:
-			return mt->t[l.c[0]]->t[l.c[1]]->v[l.c[2]];
-		case 5:
-			return mt->t[l.c[0]]->t[l.c[1]]->t[l.c[2]]->v[l.c[3]];
-		default:
-			assert(false);
-	}
-	assert(false);
-	return false; // Fixes warning, we never get here
+	return nextSlot(mt, play) == NULL;
 }

@@ -39,16 +39,21 @@ __attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* c
 
 __attribute__((pure,nonnull,hot)) static const struct play* nextSlot(const struct mTable* const restrict mt, const struct play* const restrict play)
 {
-	const struct play* t;
+	const struct play *t, *tt;
 
 	{	assert(mt);
 		assert(play);}
 
-	t = &mt->table[mHash(play)];
+	tt = &mt->table[mHash(play)];
+	t = tt;
 	while(t->n) {
 		if(isEqualEnough(t, play)) // Play is already present
 			return NULL;
 		t = (t - mt->table > MT_SIZE) ? mt->table : t + 1;
+		if(unlikely(t == tt)) {
+			fprintf(stderr, "%s: Move hash table is full.\n", __func__);
+			return NULL;
+		}
 	}
 	return t;
 }
@@ -63,12 +68,10 @@ void initMTable(struct mTable* const restrict mt)
 
 void addMove(struct mTable* const restrict mt, const struct play* const restrict play)
 {
-	struct play* t;
-
 	{	assert(mt);
 		assert(play);}
 
-	t = (struct play*)nextSlot(mt, play);
+	struct play* const t = (struct play*)nextSlot(mt, play);
 	if(t)
 		*t = *play;
 }

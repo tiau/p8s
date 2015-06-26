@@ -2,13 +2,12 @@
 
 void initDeckSans(struct deck* const restrict deck, const struct player* const restrict player, const struct deck* const restrict pile)
 {
-	size_t i, j;
-
 	{	assert(deck);
 		assert(player);
 		assert(player->n + 1 < DECKLEN);
 		assert(pile);}
 
+	size_t i, j;
 	const size_t as = pile->n + player->n;
 	card_t tp[as];
 

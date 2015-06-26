@@ -33,15 +33,6 @@ __attribute__((nonnull,hot)) inline static void shuffle(struct deck* const restr
 	deck->top = deck->c;
 }
 
-__attribute__((nonnull,hot)) inline static void initPile(struct deck* const restrict pile)
-{
-	assert(pile);
-
-	memset(pile->c, 0, DECKLEN);
-	pile->top = pile->c;
-	pile->n = 0;
-}
-
 __attribute__((nonnull,hot)) inline static void initDeck(struct deck* const restrict deck)
 {
 	size_t i;
@@ -84,6 +75,7 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, c
 	gs->deck.n--;
 	gs->turn = 0;
 	gs->eightSuit = UNKNOWN;
+	gs->magic = false;
 	gs->ai = ai;
 }
 

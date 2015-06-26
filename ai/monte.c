@@ -45,10 +45,8 @@ __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamest
 {
 	assert(ogs);
 
-	const struct player* player = stateToPlayer(ogs);
-
 	initGameStateHypoShared(gs, ogs);
-	initDeckSans(&gs->deck, player, &ogs->pile);
+	initDeckSans(&gs->deck, stateToPlayer(ogs), &ogs->pile);
 	dealStateSans(gs, ogs);
 }
 

@@ -48,6 +48,15 @@ bool playerDrawCard(struct gamestate* const gs,
 bool drawCard(struct gamestate* const restrict gs)
 	__attribute__((nonnull));
 
+__attribute__((nonnull,hot)) inline static void initPile(struct deck* const restrict pile)
+{
+	assert(pile);
+
+	memset(pile->c, 0, DECKLEN);
+	pile->top = pile->c;
+	pile->n = 0;
+}
+
 __attribute__((hot,const)) inline static bool isMagicCard(card_t c)
 {
 	{	assert(c);

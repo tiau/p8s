@@ -110,3 +110,53 @@ void showGameState(const struct gamestate* const restrict gs)
 	}
 	printf(", %sTurn %s%zu%s (player %s%zu%s)\n", ANSI_DEFAULT, ANSI_WHITE, gs->turn, ANSI_DEFAULT, ANSI_WHITE, (gs->turn - (!getGameState(gs) ? 1 : 0)) % gs->nplayers, ANSI_DEFAULT);
 }
+
+card_t readCard(const char* const restrict str)
+{
+	card_t ret = 0;
+
+	{	assert(str);
+		assert(isalnum(str[0]));
+		assert(isalpha(str[1]));}
+
+	switch(toupper(str[0])) {
+		case 'A':
+			ret += 1;
+			break;
+		case 'K':
+			ret += 13;
+			break;
+		case 'Q':
+			ret += 12;
+			break;
+		case 'J':
+			ret += 11;
+			break;
+		case 'X':
+		case '0':
+			ret += 10;
+			break;
+		default:
+			ret += atoi(str);
+			break;
+	}
+	switch(toupper(str[1])) {
+		case 'D':
+			ret += 13;
+			break;
+		case 'H':
+			ret += 26;
+			break;
+		case 'S':
+			ret += 39;
+			break;
+	}
+
+	if(!ret) {
+		char buf[3] = { '\0' };
+		memcpy(buf, str, 2);
+		fprintf(stderr, "%s: Could not parse %s as a value and suit.\n", __func__, buf);
+	}
+
+	return ret;
+}

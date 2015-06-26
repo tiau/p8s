@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include "../defines.h"
 #include "../io.h"
 #include "monte.h"

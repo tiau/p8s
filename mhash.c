@@ -58,7 +58,7 @@ __attribute__((pure,nonnull,hot)) static const struct play* nextSlot(const struc
 	return t;
 }
 
-void initMTable(struct mTable* const restrict mt)
+void initMoveTable(struct mTable* const restrict mt)
 {
 	assert(mt);
 
@@ -72,8 +72,7 @@ void addMove(struct mTable* const restrict mt, const struct play* const restrict
 		assert(play);}
 
 	struct play* const t = (struct play*)nextSlot(mt, play);
-	if(t)
-		*t = *play;
+	if(t) *t = *play;
 }
 
 bool lookupMove(const struct mTable* const restrict mt, const struct play* const restrict play)

@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include "defines.h"
 #include "engine.h"
 
@@ -38,5 +39,8 @@ void showPile(const struct deck* const pile)
 
 void showGameState(const struct gamestate* const restrict gs)
 	__attribute__((nonnull,cold));
+
+card_t readCard(const char* const restrict str)
+	__attribute__((nonnull,pure,cold));
 
 #endif /* IO_H */

@@ -1,5 +1,4 @@
 #include "defines.h"
-#include "util.h"
 
 #ifndef POKER_H
 #define POKER_H

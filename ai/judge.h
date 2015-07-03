@@ -1,5 +1,4 @@
 #include "shedder.h"
-#include "../io.h"
 
 /* The Judge AI looks at both what cards it might play and what cards would be
  * left in its hand to determine a good play to make.  The heuristics aren't

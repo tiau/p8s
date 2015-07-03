@@ -88,60 +88,6 @@ void cleanGameState(struct gamestate* const restrict gs)
 	gs->pile.n = 0;
 }
 
-int getGameState(const struct gamestate* const restrict gs)
-{
-	assert(gs);
-
-	if(gs->nplayers >= MINPLRS && gs->nplayers <= MAXPLRS) {
-		size_t i;
-		for(i = 0; i < gs->nplayers; i++)
-			if(!gs->players[i].n)
-				return CONCLUDED;
-		return INPROGRESS;
-	}
-	return NOTSTARTED;
-}
-
-bool isPlayLegal(const struct play* const restrict play)
-{
-	{	assert(play);
-		assert(play->n);}
-
-	switch(play->n) {
-		case 1:
-			return true;
-		case 2:
-			return isPair(play);
-		case 3:
-			return isThreeOAK(play);
-		case 4:
-			return isTwoPair(play) ||
-				   isFourOAK(play);
-		case 5:
-			return isFlush(play) ||		// Straights are more common, but flushes
-				   isStraight(play) ||	// are faster to check
-				   isFullHouse(play);
-		default:
-			assert(false);
-	}
-	assert(false);
-	return false; // Fixes warning, we never get here
-}
-
-bool isCardOneLegal(const struct gamestate* const restrict gs, const struct play* const restrict play)
-{
-	card_t v;
-
-	{	assert(gs);
-		assert(play);
-		assert(play->n);}
-
-	v = getVal(*play->c);
-	return ((getSuit(*play->c) == ((gs->eightSuit == UNKNOWN) ? getSuit(*gs->pile.top) : gs->eightSuit)) ||
-			(v == getVal(*gs->pile.top)) ||
-			(v == 8));
-}
-
 __attribute__((nonnull,hot)) static void removeCard(struct player* const restrict player, const card_t c)
 {
 	card_t* i;
@@ -220,4 +166,114 @@ bool drawCard(struct gamestate* const restrict gs)
 	}
 
 	return r;
+}
+
+float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool eight, bool magic, uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict))
+{
+	size_t i;
+	const struct play* play;
+	bool eightLastTurn = false;
+	card_t tc;
+	uint32_t ptm = 0;
+	struct aistate as = { .gs = gs };
+
+	assert(gs);
+	assert(gs->players);
+
+	while(getGameState(gs)) {
+		if(!eightLastTurn) gs->eightSuit = UNKNOWN;
+		gs->drew = !gs->deck.n;
+
+		if(verbose) {
+			showGameState(gs);
+			if(verbose > 1) {
+				printf("Deck ");
+				showDeck(&gs->deck);
+				printf("Pile ");
+				showPile(&gs->pile);
+				for(i = 0; i < gs->nplayers; i++) {
+					orderHand(&gs->players[i]);
+					showHand(&gs->players[i]);
+				}
+			}
+		}
+
+		if(gs->magic) {
+			tc = getVal(*gs->pile.top);
+			gs->magic = false;
+
+			if(tc == 2) {
+				if(verbose) printf("%s2 played, drawing 2%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				drawCard(gs);
+				drawCard(gs);
+			} else if(tc == 3) {
+				if(verbose) printf("%s3 played, skipping turn%s\n\n", ANSI_BLUE, ANSI_DEFAULT);
+				gs->turn++;
+				continue;
+			}
+		}
+
+		for(;;) {
+			as.pl = getPotentials(gs, stateToPlayer(gs));
+
+			if(as.pl->n) {
+				if(verbose > 2 && as.pl->n) {
+					printf("Potentials %s(%zu)\t", ANSI_WHITE, as.pl->n);
+					for(i = 0; i < as.pl->n; i++)
+						showPlay(plistGet(as.pl, i));
+					printf("%s \n", ANSI_BACK);
+				}
+				ptm = (*aia[gs->turn % gs->nplayers])(&as);
+			} else {
+				MPACK(ptm, 0);
+			}
+
+			if(gs->drew || MUPACK(ptm) != as.pl->n)
+				break;
+			if(verbose) printf("%s%s drawing%s\n", ANSI_BLUE, as.pl->n ? "Voluntary" : "Forced", ANSI_DEFAULT);
+			if(!drawCard(gs))
+				if(verbose) printf("%sCould not draw card%s\n", ANSI_BLUE, ANSI_DEFAULT);
+			gs->drew = true;
+			plistDel(as.pl);
+		}
+
+		if(as.pl->n) {
+			i = MUPACK(ptm);
+			if(i != as.pl->n) {
+				play = plistGet(as.pl, i);
+				eightLastTurn = (getVal(play->c[play->n-1]) == 8);
+				if(verbose) {
+					printf("%sPlaying%s ", ANSI_BLUE, ANSI_DEFAULT);
+					showPlay(play);
+					printf("%s \n", ANSI_BACK);
+				}
+				makeMove(gs, play);
+				if(eightLastTurn) {
+					gs->eightSuit = ESUPACK(ptm);
+					if(verbose) {
+						printf("%sSuit is now%s ", ANSI_BLUE, ANSI_DEFAULT);
+						showSuit(gs->eightSuit);
+						printf("\n");
+					}
+				}
+				gs->magic = isMagicCard(*gs->pile.top);
+			} else {
+				if(verbose) printf("%sVoluntary passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+			}
+		} else {
+			if(!gs->drew) {
+				if(verbose) printf("%sForced drawing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(!drawCard(gs)) {
+					if(verbose) printf("%sCould not draw, forced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				}
+			} else {
+				if(verbose) printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+			}
+		}
+		plistDel(as.pl);
+		gs->turn++;
+		if(verbose) printf("\n");
+	}
+
+	return (((gs->turn - 1) % gs->nplayers) ? -1.0 * gs->turn : gs->turn);
 }

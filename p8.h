@@ -1,9 +1,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <signal.h>
-#include "defines.h"
 #include "engine.h"
-#include "io.h"
 #include "ai.h"
 
 #ifndef P8_H

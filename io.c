@@ -160,3 +160,17 @@ card_t readCard(const char* const restrict str)
 
 	return ret;
 }
+
+int getGameState(const struct gamestate* const restrict gs)
+{
+	assert(gs);
+
+	if(gs->nplayers >= MINPLRS && gs->nplayers <= MAXPLRS) {
+		size_t i;
+		for(i = 0; i < gs->nplayers; i++)
+			if(!gs->players[i].n)
+				return CONCLUDED;
+		return INPROGRESS;
+	}
+	return NOTSTARTED;
+}

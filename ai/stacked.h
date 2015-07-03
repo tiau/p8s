@@ -1,5 +1,4 @@
 #include "monte.h"
-#include "random.h"
 
 /* The Stacked AI is the same as the Monte AI except that instead of just
  * randomly shuffling all the cards that it doesn't know about (opponent's

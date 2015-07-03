@@ -1,4 +1,3 @@
-#include "../defines.h"
 #include "../plist.h"
 
 /* The random AI selects a random play to make.  If that play ends on an 8 it

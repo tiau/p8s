@@ -50,73 +50,6 @@ __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamest
 	dealStateSans(gs, ogs);
 }
 
-/* This is mostly a duplication of gameLoop from p8s.c, it lacks all the
- * checks for verbosity levels and should be a bit faster. */
-__attribute__((hot,nonnull)) static float gameLoopHypothetical(struct gamestate* const restrict gs, bool eight, bool magic, uint_fast32_t (*aif)(const struct aistate* const restrict as))
-{
-	size_t airv = 0, t;
-	const struct play* play;
-	struct aistate as = { .gs = gs };
-	bool drew;
-	card_t tc;
-
-	{	assert(gs);
-		assert(gs->players);
-		assert(aif);
-		assert(gs->nplayers >= MINPLRS && gs->nplayers <= MAXPLRS);}
-
-	while(getGameState(gs)) {
-		if(!eight) gs->eightSuit = UNKNOWN;
-		drew = !gs->deck.n;
-
-		if(unlikely(magic)) {
-			tc = getVal(*gs->pile.top);
-			magic = false;
-
-			if(tc == 2) {
-				drawCard(gs);
-				drawCard(gs);
-			} else if(tc == 3) {
-				gs->turn++;
-				continue;
-			}
-		}
-
-		for(;;) {
-			as.pl = getPotentials(gs, stateToPlayer(gs));
-
-			if(as.pl->n)
-				airv = aif(&as);
-			else
-				MPACK(airv, 0);
-			if(drew || MUPACK(airv) != as.pl->n)
-				break;
-			drawCard(gs);
-			drew = true;
-			plistDel(as.pl);
-		}
-
-		if(as.pl->n) {
-			t = MUPACK(airv);
-			if(t != as.pl->n) {
-				play = plistGet(as.pl, t);
-				eight = (getVal(play->c[play->n-1]) == 8);
-				makeMove(gs, play);
-				if(eight)
-					gs->eightSuit = ESUPACK(airv);
-				magic = isMagicCard(*gs->pile.top);
-			}
-		} else {
-			if(!drew)
-				drawCard(gs);
-		}
-		plistDel(as.pl);
-		gs->turn++;
-	}
-
-	return (((gs->turn - 1) % gs->nplayers) ? -1.0 * gs->turn : gs->turn);
-}
-
 __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp, const suit_t forces, const struct aistate* const restrict as, uint_fast32_t (*aif)(const struct aistate* const restrict), void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
 {
 	size_t i, ret = 0;
@@ -124,11 +57,15 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 	bool e;			// Whether we're testing a suit
 	struct gamestate gs;
 	bool magic = likely(forces == UNKNOWN && gtp);
+	uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict);
 
 	{	assert(ngames);
 		assert(forces <= UNKNOWN);
 		assert(as);
 		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
+
+	for(i = 0; i < as->gs->nplayers; i++)
+		aia[i] = aif;
 
 	for(i = 0; i < ngames; i++) {
 		(*initgs)(&gs, as->gs);
@@ -155,7 +92,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		}
 
 		// TODO use silly magic about win distance to select better plays?
-		grv = (unlikely(!gs.players[0].n) ? 1.0 : gameLoopHypothetical(&gs, e, magic, aif));
+		grv = (unlikely(!gs.players[0].n) ? 1.0 : gameLoop(&gs, false, e, magic, aia));
 		ret += (grv > 0.0);
 
 		cleanGameState(&gs);

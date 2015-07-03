@@ -1,114 +1,5 @@
 #include "p8.h"
 
-__attribute__((cold,nonnull)) static void gameLoop(struct gamestate* const restrict gs, const uint8_t verbose)
-{
-	size_t i;
-	const struct play* play;
-	bool eightLastTurn = false;
-	card_t tc;
-	uint32_t ptm = 0;
-	struct aistate as = { .gs = gs };
-
-	assert(gs);
-	assert(gs->players);
-	
-
-	while(getGameState(gs)) {
-		if(!eightLastTurn) gs->eightSuit = UNKNOWN;
-		gs->drew = !gs->deck.n;
-
-		if(verbose) {
-			showGameState(gs);
-			if(verbose > 1) {
-				printf("Deck ");
-				showDeck(&gs->deck);
-				printf("Pile ");
-				showPile(&gs->pile);
-				for(i = 0; i < gs->nplayers; i++) {
-					orderHand(&gs->players[i]);
-					showHand(&gs->players[i]);
-				}
-			}
-		}
-
-		if(gs->magic) {
-			tc = getVal(*gs->pile.top);
-			gs->magic = false;
-
-			if(tc == 2) {
-				if(verbose) printf("%s2 played, drawing 2%s\n", ANSI_BLUE, ANSI_DEFAULT);
-				drawCard(gs);
-				drawCard(gs);
-			} else if(tc == 3) {
-				if(verbose) printf("%s3 played, skipping turn%s\n\n", ANSI_BLUE, ANSI_DEFAULT);
-				gs->turn++;
-				continue;
-			}
-		}
-
-		for(;;) {
-			as.pl = getPotentials(gs, stateToPlayer(gs));
-
-			if(as.pl->n) {
-				if(verbose > 2 && as.pl->n) {
-					printf("Potentials %s(%zu)\t", ANSI_WHITE, as.pl->n);
-					for(i = 0; i < as.pl->n; i++)
-						showPlay(plistGet(as.pl, i));
-					printf("%s \n", ANSI_BACK);
-				}
-				ptm = (*ais[gs->ai[gs->turn % gs->nplayers]])(&as);
-			} else {
-				MPACK(ptm, 0);
-			}
-
-			if(gs->drew || MUPACK(ptm) != as.pl->n)
-				break;
-			if(verbose) printf("%s%s drawing%s\n", ANSI_BLUE, as.pl->n ? "Voluntary" : "Forced", ANSI_DEFAULT);
-			if(!drawCard(gs))
-				if(verbose) printf("%sCould not draw card%s\n", ANSI_BLUE, ANSI_DEFAULT);
-			gs->drew = true;
-			plistDel(as.pl);
-		}
-
-		if(as.pl->n) {
-			i = MUPACK(ptm);
-			if(i != as.pl->n) {
-				play = plistGet(as.pl, i);
-				eightLastTurn = (getVal(play->c[play->n-1]) == 8);
-				if(verbose) {
-					printf("%sPlaying%s ", ANSI_BLUE, ANSI_DEFAULT);
-					showPlay(play);
-					printf("%s \n", ANSI_BACK);
-				}
-				makeMove(gs, play);
-				if(eightLastTurn) {
-					gs->eightSuit = ESUPACK(ptm);
-					if(verbose) {
-						printf("%sSuit is now%s ", ANSI_BLUE, ANSI_DEFAULT);
-						showSuit(gs->eightSuit);
-						printf("\n");
-					}
-				}
-				gs->magic = isMagicCard(*gs->pile.top);
-			} else {
-				if(verbose) printf("%sVoluntary passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-			}
-		} else {
-			if(!gs->drew) {
-				if(verbose) printf("%sForced drawing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-				if(!drawCard(gs)) {
-					if(verbose) printf("%sCould not draw, forced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-				}
-			} else {
-				if(verbose) printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-			}
-		}
-		plistDel(as.pl);
-		gs->turn++;
-		if(verbose) printf("\n");
-	}
-}
-
 __attribute__((cold,noreturn)) static void sigintQueueClean(int sig)
 {
 	char pidstr[12];
@@ -202,6 +93,7 @@ int main(int argc, char* argv[])
 	size_t wp = 0;
 	struct gamestate igs;
 	bool hypo = false, hv = false;
+	uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict);
 
 	assert(CPP * MAXPLRS < DECKLEN);
 
@@ -295,6 +187,9 @@ int main(int argc, char* argv[])
 	signal(SIGABRT, sigintQueueClean);
 #endif
 
+	for(i = 0; i < nplayers; i++)
+		aia[i] = ais[ai[i]];
+
 	struct player tplayer;
 	if(hypo) {
 		size_t j;
@@ -315,7 +210,7 @@ int main(int argc, char* argv[])
 		else
 			initGameState(&gs, nplayers, ai);
 
-		gameLoop(&gs, verbose);
+		gameLoop(&gs, verbose, false, false, aia);
 		showGameState(&gs);
 		victories[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
 		cleanGameState(&gs);

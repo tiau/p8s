@@ -2,10 +2,8 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <mqueue.h>
+#include <math.h>
 #include "draw.h"
-#include "../engine.h"
-#include "../movegen.h"
-#include "../io.h"
 
 /* The Monte (Carlo) AI runs a whole bunch of games for each possible play it
  * might make.  One of the simpler AIs is used for these games.  Each game is

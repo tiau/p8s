@@ -1,6 +1,3 @@
-#include "../defines.h"
-#include "../io.h"
-#include "monte.h"
 #include "stacked.h"
 #include "cheat.h"
 

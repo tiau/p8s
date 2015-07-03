@@ -1,6 +1,6 @@
 #include <ctype.h>
+#include <string.h>
 #include "defines.h"
-#include "engine.h"
 
 #ifndef IO_H
 #define IO_H
@@ -42,5 +42,8 @@ void showGameState(const struct gamestate* const restrict gs)
 
 card_t readCard(const char* const restrict str)
 	__attribute__((nonnull,pure,cold));
+
+int getGameState(const struct gamestate* const restrict gs)
+	__attribute__((cold,nonnull,pure));
 
 #endif /* IO_H */

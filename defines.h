@@ -78,4 +78,42 @@ struct aistate {
 	struct plist* restrict pl;
 };
 
+
+__attribute__((hot,const,always_inline))
+inline static suit_t getSuit(const card_t c)
+{
+	/* Lookup tables are much faster than computation for this and getVal */
+	static const suit_t vals[] = {UNKNOWN,
+								  0,0,0,0,0,0,0,0,0,0,0,0,0,
+								  1,1,1,1,1,1,1,1,1,1,1,1,1,
+								  2,2,2,2,2,2,2,2,2,2,2,2,2,
+								  3,3,3,3,3,3,3,3,3,3,3,3,3};
+	assert((c-1)/(DECKLEN/4) == vals[c]);
+	return vals[c];
+}
+
+__attribute__((hot,const,always_inline))
+inline static card_t getVal(const card_t c)
+{
+	static const card_t vals[] = {0,
+								  1,2,3,4,5,6,7,8,9,10,11,12,13,
+								  1,2,3,4,5,6,7,8,9,10,11,12,13,
+								  1,2,3,4,5,6,7,8,9,10,11,12,13,
+								  1,2,3,4,5,6,7,8,9,10,11,12,13};
+	assert(((c-1) % (DECKLEN/4)) + 1 == vals[c]);
+	return vals[c];
+}
+
+__attribute__((hot,const,always_inline))
+inline static size_t min(const size_t x, const size_t y)
+{
+	return (x > y ? y : x);
+}
+
+__attribute__((hot,const,always_inline))
+inline static size_t max(const size_t x, const size_t y)
+{
+	return (x > y ? x : y);
+}
+
 #endif /* DEFINES_H */

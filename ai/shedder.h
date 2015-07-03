@@ -1,6 +1,4 @@
-#include "../defines.h"
-#include "../util.h"
-#include "../plist.h"
+#include "../engine.h"
 
 /* The shedder AI selects the first play it comes across that drops the maximum
  * number of cards it can drop on a given turn.  For example, it will play a

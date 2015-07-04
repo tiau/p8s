@@ -141,6 +141,8 @@ card_t readCard(const char* const restrict str)
 			break;
 	}
 	switch(toupper(str[1])) {
+		case 'C':
+			break;
 		case 'D':
 			ret += 13;
 			break;
@@ -150,6 +152,8 @@ card_t readCard(const char* const restrict str)
 		case 'S':
 			ret += 39;
 			break;
+		default:
+			ret = 0;
 	}
 
 	if(!ret) {

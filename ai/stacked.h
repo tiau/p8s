@@ -1,7 +1,7 @@
 #include "monte.h"
 
 /* The Stacked AI is the same as the Monte AI except that instead of just
- * randomly shuffling all the cards that it doesn't know about (opponent's
+ * randomly shuffling all the cards that it doesn't know about (opponents'
  * hands and the deck) it tends to put magic cards (2s, 3s, 8s) into its
  * opponents hands, as smart players will likely be holding these cards. */
 

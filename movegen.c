@@ -129,8 +129,6 @@ bool isPlayLegal(const struct play* const restrict play)
 			return isFlush(play) ||		// Straights are more common, but flushes
 				   isStraight(play) ||	// are faster to check
 				   isFullHouse(play);
-		default:
-			assert(false);
 	}
 	assert(false);
 	return false; // Fixes warning, we never get here

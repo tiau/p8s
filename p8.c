@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if(!nplayers || ai[0] == 255 || ai[nplayers-1] == 255 || nplayers < wp || !verifyHypoGame(&igs, wp)) {
+	if(!nplayers || ai[0] == 255 || nplayers < wp || !verifyHypoGame(&igs, wp)) {
 		fprintf(stderr, "Usage: %s -m nn[nn] [-g n] [-v] [-p cards] [-h cards] [-d cards]\nOptions:\n", 1+rindex(*argv, '/'));
 		fprintf(stderr, "\t-m Modes (e.g. -m00, -m124)\n");
 		fprintf(stderr, "\t-g Number of games to play\n");

@@ -53,7 +53,6 @@ __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamest
 __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp, const suit_t forces, const struct aistate* const restrict as, uint_fast32_t (*aif)(const struct aistate* const restrict), void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
 {
 	size_t i, ret = 0;
-	float grv;		// Win/lose distance
 	bool e;			// Whether we're testing a suit
 	struct gamestate gs;
 	bool magic = likely(forces == UNKNOWN && gtp);
@@ -91,9 +90,12 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 			e = true;
 		}
 
+		if(unlikely(!gs.players[0].n)) {
+			ret += ngames;
+			break;
+		}
 		// TODO use silly magic about win distance to select better plays?
-		grv = (unlikely(!gs.players[0].n) ? 1.0 : gameLoop(&gs, false, e, magic, aia));
-		ret += (grv > 0.0);
+		ret += (gameLoop(&gs, false, e, magic, aia) > 0.0);
 
 		cleanGameState(&gs);
 	}

@@ -3,7 +3,7 @@
 suit_t freqSuit(const struct player* const restrict player)
 {
 	size_t i, most;
-	suit_t ret = CLUBS;
+	suit_t ret = Clubs;
 	size_t ns[4] = { 0 };
 
 	assert(player);
@@ -12,7 +12,7 @@ suit_t freqSuit(const struct player* const restrict player)
 		if(getVal(player->c[i]) != 8)
 			ns[getSuit(player->c[i])]++;
 
-	for(i = CLUBS; i <= SPADES; i++) {
+	for(i = Clubs; i <= Spades; i++) {
 		if(ns[i] > most) {
 			most = ns[i];
 			ret = i;

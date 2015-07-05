@@ -96,19 +96,33 @@ void showGameState(const struct gamestate* const restrict gs)
 	assert(gs);
 
 	switch(getGameState(gs)) {
-		case CONCLUDED:
+		case Concluded:
 			printf("%sConcluded", ANSI_DRED);
 			break;
-		case INPROGRESS:
+		case InProgress:
 			printf("%sIn progress", ANSI_GREEN);
 			break;
-		case NOTSTARTED:
+		case NotStarted:
 			printf("%sNot started", ANSI_YELLOW);
 			break;
 		default:
 			assert(false);
 	}
 	printf(", %sTurn %s%zu%s (player %s%zu%s)\n", ANSI_DEFAULT, ANSI_WHITE, gs->turn, ANSI_DEFAULT, ANSI_WHITE, (gs->turn - (!getGameState(gs) ? 1 : 0)) % gs->nplayers, ANSI_DEFAULT);
+}
+
+int getGameState(const struct gamestate* const restrict gs)
+{
+	assert(gs);
+
+	if(gs->nplayers >= MINPLRS && gs->nplayers <= MAXPLRS) {
+		size_t i;
+		for(i = 0; i < gs->nplayers; i++)
+			if(!gs->players[i].n)
+				return Concluded;
+		return InProgress;
+	}
+	return NotStarted;
 }
 
 card_t readCard(const char* const restrict str)
@@ -163,18 +177,4 @@ card_t readCard(const char* const restrict str)
 	}
 
 	return ret;
-}
-
-int getGameState(const struct gamestate* const restrict gs)
-{
-	assert(gs);
-
-	if(gs->nplayers >= MINPLRS && gs->nplayers <= MAXPLRS) {
-		size_t i;
-		for(i = 0; i < gs->nplayers; i++)
-			if(!gs->players[i].n)
-				return CONCLUDED;
-		return INPROGRESS;
-	}
-	return NOTSTARTED;
 }

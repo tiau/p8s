@@ -39,7 +39,7 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 	}
 
 	/* Flush check and 0 suit scoring */
-	for(i = CLUBS; i <= SPADES; i++) {
+	for(i = Clubs; i <= Spades; i++) {
 		switch(nsuits[i]) {
 			case 0:
 				if(player->n > 2)

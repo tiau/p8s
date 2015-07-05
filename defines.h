@@ -30,17 +30,17 @@ typedef uint_fast8_t  suit_t, card_t;
 #define MUPACK(A)	((A) & 0xFFFF)
 
 enum suit {
-	CLUBS,
-	DIAMONDS,
-	HEARTS,
-	SPADES,
-	UNKNOWN
+	Clubs,
+	Diamonds,
+	Hearts,
+	Spades,
+	Unknown
 };
 
 enum gamestatus {
-	CONCLUDED,
-	INPROGRESS,
-	NOTSTARTED
+	Concluded,
+	InProgress,
+	NotStarted
 };
 
 /* Players can only hold DECKLEN-2 cards since there must be at least one card
@@ -83,7 +83,7 @@ __attribute__((hot,const,always_inline))
 inline static suit_t getSuit(const card_t c)
 {
 	/* Lookup tables are much faster than computation for this and getVal */
-	static const suit_t vals[] = {UNKNOWN,
+	static const suit_t vals[] = {Unknown,
 								  0,0,0,0,0,0,0,0,0,0,0,0,0,
 								  1,1,1,1,1,1,1,1,1,1,1,1,1,
 								  2,2,2,2,2,2,2,2,2,2,2,2,2,

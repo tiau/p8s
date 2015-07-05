@@ -44,7 +44,7 @@ inline static bool isCardOneLegal(const struct gamestate* const restrict gs, con
 		assert(play->n);}
 
 	const card_t v = getVal(*play->c);
-	return ((getSuit(*play->c) == ((gs->eightSuit == UNKNOWN) ? getSuit(*gs->pile.top) : gs->eightSuit)) ||
+	return ((getSuit(*play->c) == ((gs->eightSuit == Unknown) ? getSuit(*gs->pile.top) : gs->eightSuit)) ||
 			(v == getVal(*gs->pile.top)) ||
 			(v == 8));
 }

@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 		size_t j;
 
 		igs.nplayers = nplayers;
-		igs.eightSuit = UNKNOWN;
+		igs.eightSuit = Unknown;
 
 		tplayer.n = 0;
 		for(i = 0; i < wp; i++)

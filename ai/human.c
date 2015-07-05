@@ -96,16 +96,16 @@ uint_fast32_t human(const struct aistate* const restrict as)
 					continue;
 				switch(tolower(*b)) {
 					case 's':
-						ESPACK(ret, SPADES);
+						ESPACK(ret, Spades);
 						break;
 					case 'h':
-						ESPACK(ret, HEARTS);
+						ESPACK(ret, Hearts);
 						break;
 					case 'd':
-						ESPACK(ret, DIAMONDS);
+						ESPACK(ret, Diamonds);
 						break;
 					case 'c':
-						ESPACK(ret, CLUBS);
+						ESPACK(ret, Clubs);
 						break;
 					default:
 						printf("You must enter a suit\n");

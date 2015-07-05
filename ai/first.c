@@ -8,6 +8,6 @@ uint_fast32_t aiFirst(const struct aistate* const restrict as __attribute__((unu
 
 	uint_fast32_t ret = 0;
 	MPACK(ret, 0);
-	ESPACK(ret, CLUBS);
+	ESPACK(ret, Clubs);
 	return ret;
 }

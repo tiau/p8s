@@ -74,7 +74,7 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, c
 	gs->pile.n++;
 	gs->deck.n--;
 	gs->turn = 0;
-	gs->eightSuit = UNKNOWN;
+	gs->eightSuit = Unknown;
 	gs->magic = false;
 	gs->ai = ai;
 }
@@ -181,7 +181,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 	assert(gs->players);
 
 	while(getGameState(gs)) {
-		if(!eightLastTurn) gs->eightSuit = UNKNOWN;
+		if(!eightLastTurn) gs->eightSuit = Unknown;
 		gs->drew = !gs->deck.n;
 
 		if(unlikely(verbose)) {

@@ -55,11 +55,11 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 	size_t i, ret = 0;
 	bool e;			// Whether we're testing a suit
 	struct gamestate gs;
-	bool magic = likely(forces == UNKNOWN && gtp);
+	bool magic = likely(forces == Unknown && gtp);
 	uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict);
 
 	{	assert(ngames);
-		assert(forces <= UNKNOWN);
+		assert(forces <= Unknown);
 		assert(as);
 		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
 
@@ -81,7 +81,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		}
 
 		gs.eightSuit = forces;
-		if(likely(forces == UNKNOWN)) {	// If we aren't testing a suit
+		if(likely(forces == Unknown)) {	// If we aren't testing a suit
 			if(likely(gtp != NULL))		// ...we either have a play
 				e = unlikely(getVal(gtp->c[gtp->n-1]) == 8);
 			else						// ...or draw/pass
@@ -146,7 +146,7 @@ static void initMoveMap(size_t* const restrict emap, const struct plist* const p
 	for(i = 0, m = 0; i < pl->n; i++) {
 		play = plistGet(pl, i);
 		if(unlikely(getVal(play->c[play->n-1]) == 8))
-			for(j = CLUBS; j <= SPADES; j++)
+			for(j = Clubs; j <= Spades; j++)
 				emap[m++] = i;
 		else
 			emap[m++] = i;
@@ -212,13 +212,13 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				for(i = 0, m = 0; i < s->as->pl->n; i++) {
 					play = plistGet(s->as->pl, i);
 					if(unlikely(getVal(play->c[play->n-1]) == 8)) {
-						for(j = CLUBS; j <= SPADES; j++)
+						for(j = Clubs; j <= Spades; j++)
 							sendPlay(s, i, m++, j, hmg, dead);
 					} else {
-						sendPlay(s, i, m++, UNKNOWN, hmg, dead);
+						sendPlay(s, i, m++, Unknown, hmg, dead);
 					}
 				}
-				sendPlay(s, i, m, UNKNOWN, hmg, dead);
+				sendPlay(s, i, m, Unknown, hmg, dead);
 			}
 			hmg += hmg / 8;
 			usleep(4000);
@@ -366,13 +366,13 @@ static uint_fast32_t findBest(const struct pctmstate* const restrict s)
 		if(ft > bs && s->trials[i]) {
 			bs = ft;
 			MPACK(ret, m);
-			ESPACK(ret, CLUBS);
+			ESPACK(ret, Clubs);
 			if(unlikely(i && m == s->emap[i-1])) {
-				ESPACK(ret, DIAMONDS);
+				ESPACK(ret, Diamonds);
 				if(i > 1 && s->emap[i-1] == s->emap[i-2]) {
-					ESPACK(ret, HEARTS);
+					ESPACK(ret, Hearts);
 					if(i > 2 && s->emap[i-2] == s->emap[i-3]) {
-						ESPACK(ret, SPADES);
+						ESPACK(ret, Spades);
 					}
 				}
 			}

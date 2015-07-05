@@ -62,7 +62,7 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 			c = *td.top++;
 			fs = getSuit(c);
 			hmb += 0.15 + (fs == as->gs->eightSuit ||
-					      (as->gs->eightSuit == UNKNOWN && fs == ns) ||
+					      (as->gs->eightSuit == Unknown && fs == ns) ||
 					      getVal(c) == 8 ||
 					      getVal(c) == nv);
 		}

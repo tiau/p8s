@@ -11,7 +11,7 @@ TFLAGS := -pg -g -fprofile-arcs -ftest-coverage
 PROFILE := -fno-omit-frame-pointer -fno-inline-functions -fno-inline-functions-called-once -fno-optimize-sibling-calls -fno-inline
 
 FILES := engine.c io.c mhash.c movegen.c p8.c plist.c poker.c
-AIS := ai/human.c ai/first.c ai/random.c ai/shedder.c ai/monte.c ai/judge.c ai/stacked.c ai/draw.c ai/cheat.c
+AIS := ai/human.c ai/first.c ai/random.c ai/shedder.c ai/monte.c ai/judge.c ai/stacked.c ai/draw.c ai/cheat.c ai/monteF.c ai/monteR.c ai/monteS.c ai/monteD.c
 FAI := ${FILES} ${AIS}
 
 all: ${FAI}

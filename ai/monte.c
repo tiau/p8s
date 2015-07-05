@@ -41,7 +41,7 @@ void initGameStateHypoShared(struct gamestate* const restrict gs, const struct g
 	gs->magic = false;
 }
 
-__attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
+void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
 	assert(ogs);
 

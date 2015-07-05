@@ -52,6 +52,10 @@ void initGameStateHypoShared(struct gamestate* const restrict gs,
 							 const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));
 
+void initGameStateHypothetical(struct gamestate* const restrict gs,
+							   const struct gamestate* const restrict ogs)
+	__attribute__((hot,nonnull));
+
 uint_fast32_t pctmRun(const struct aistate* const restrict as,
 					  void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict),
 					  uint_fast32_t (*aif)(const struct aistate* const restrict))

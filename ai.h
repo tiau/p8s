@@ -8,12 +8,16 @@
 #include "ai/monte.h"
 #include "ai/stacked.h"
 #include "ai/cheat.h"
+#include "ai/monteF.h"
+#include "ai/monteR.h"
+#include "ai/monteS.h"
+#include "ai/monteD.h"
 
 #ifndef AI_H
 #define AI_H
 
 /* Number of AIs, counting human */
-#define NAI 9
+#define NAI 13
 
 static uint_fast32_t (*ais[NAI])(const struct aistate* const restrict) =
 {
@@ -25,7 +29,11 @@ static uint_fast32_t (*ais[NAI])(const struct aistate* const restrict) =
 	&aiDraw,	// 5
 	&aiMonte,	// 6
 	&aiStacked,	// 7
-	&aiCheat	// 8
+	&aiCheat,	// 8
+	&aiMonteF,	// 9
+	&aiMonteR,	// 10
+	&aiMonteS,	// 11
+	&aiMonteD	// 12
 };
 
 static const char *aiDesc[] =
@@ -38,7 +46,11 @@ static const char *aiDesc[] =
 	"judges&draws",
 	"monte carlo",
 	"stacked monte carlo",
-	"cheats"
+	"cheats",
+	"monte w/ first",
+	"monte w/ random",
+	"monte w/ shedder",
+	"monte w/ draw"
 };
 
 #endif /* AI_H */

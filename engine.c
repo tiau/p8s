@@ -184,7 +184,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 		if(!eightLastTurn) gs->eightSuit = UNKNOWN;
 		gs->drew = !gs->deck.n;
 
-		if(verbose) {
+		if(unlikely(verbose)) {
 			showGameState(gs);
 			if(verbose > 1) {
 				printf("Deck ");
@@ -203,11 +203,11 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 			gs->magic = false;
 
 			if(tc == 2) {
-				if(verbose) printf("%s2 played, drawing 2%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(unlikely(verbose)) printf("%s2 played, drawing 2%s\n", ANSI_BLUE, ANSI_DEFAULT);
 				drawCard(gs);
 				drawCard(gs);
 			} else if(tc == 3) {
-				if(verbose) printf("%s3 played, skipping turn%s\n\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(unlikely(verbose)) printf("%s3 played, skipping turn%s\n\n", ANSI_BLUE, ANSI_DEFAULT);
 				gs->turn++;
 				continue;
 			}
@@ -217,7 +217,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 			as.pl = getPotentials(gs, stateToPlayer(gs));
 
 			if(as.pl->n) {
-				if(verbose > 2 && as.pl->n) {
+				if(unlikely(verbose > 2 && as.pl->n)) {
 					printf("Potentials %s(%zu)\t", ANSI_WHITE, as.pl->n);
 					for(i = 0; i < as.pl->n; i++)
 						showPlay(plistGet(as.pl, i));
@@ -230,9 +230,9 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 
 			if(gs->drew || MUPACK(ptm) != as.pl->n)
 				break;
-			if(verbose) printf("%s%s drawing%s\n", ANSI_BLUE, as.pl->n ? "Voluntary" : "Forced", ANSI_DEFAULT);
+			if(unlikely(verbose)) printf("%s%s drawing%s\n", ANSI_BLUE, as.pl->n ? "Voluntary" : "Forced", ANSI_DEFAULT);
 			if(!drawCard(gs))
-				if(verbose) printf("%sCould not draw card%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(unlikely(verbose)) printf("%sCould not draw card%s\n", ANSI_BLUE, ANSI_DEFAULT);
 			gs->drew = true;
 			plistDel(as.pl);
 		}
@@ -242,7 +242,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 			if(i != as.pl->n) {
 				play = plistGet(as.pl, i);
 				eightLastTurn = (getVal(play->c[play->n-1]) == 8);
-				if(verbose) {
+				if(unlikely(verbose)) {
 					printf("%sPlaying%s ", ANSI_BLUE, ANSI_DEFAULT);
 					showPlay(play);
 					printf("%s \n", ANSI_BACK);
@@ -250,7 +250,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 				makeMove(gs, play);
 				if(eightLastTurn) {
 					gs->eightSuit = ESUPACK(ptm);
-					if(verbose) {
+					if(unlikely(verbose)) {
 						printf("%sSuit is now%s ", ANSI_BLUE, ANSI_DEFAULT);
 						showSuit(gs->eightSuit);
 						printf("\n");
@@ -258,21 +258,21 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 				}
 				gs->magic = isMagicCard(*gs->pile.top);
 			} else {
-				if(verbose) printf("%sVoluntary passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(unlikely(verbose)) printf("%sVoluntary passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 			}
 		} else {
 			if(!gs->drew) {
-				if(verbose) printf("%sForced drawing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(unlikely(verbose)) printf("%sForced drawing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 				if(!drawCard(gs)) {
-					if(verbose) printf("%sCould not draw, forced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+					if(unlikely(verbose)) printf("%sCould not draw, forced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 				}
 			} else {
-				if(verbose) printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
+				if(unlikely(verbose)) printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 			}
 		}
 		plistDel(as.pl);
 		gs->turn++;
-		if(verbose) printf("\n");
+		if(unlikely(verbose)) printf("\n");
 	}
 
 	return (((gs->turn - 1) % gs->nplayers) ? -1.0 * gs->turn : gs->turn);

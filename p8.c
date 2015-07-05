@@ -112,6 +112,20 @@ int main(int argc, char* argv[])
 							ti++;
 						}
 						ai[nplayers++] = optarg[i] - 48;
+					} else {
+						switch(optarg[i]) {
+							case 'A':
+								ai[nplayers++] = 10;
+								break;
+							case 'B':
+								ai[nplayers++] = 11;
+								break;
+							case 'C':
+								ai[nplayers++] = 12;
+								break;
+							default:
+								assert(false);
+						}
 					}
 				}
 				if(nplayers < MINPLRS || nplayers > MAXPLRS) {

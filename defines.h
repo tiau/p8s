@@ -61,6 +61,11 @@ struct deck {
 	size_t n;
 };
 
+struct aistate {
+	const struct gamestate* const restrict gs;
+	struct plist* restrict pl;
+};
+
 struct gamestate {
 	size_t turn;
 	struct deck deck;
@@ -68,14 +73,10 @@ struct gamestate {
 	size_t nplayers;
 	struct player* players;
 	bool drew;			// If the current player has drawn a card
-	bool magic;			// If the current card should be have a special effect
+	bool magic;			// If the current card should have a special effect
 	suit_t eightSuit;	// Suit to go on top of 8s, if magic
-	const uint8_t* ai;	// Array of AIs to invoke for each player slot
-};
-
-struct aistate {
-	const struct gamestate* const restrict gs;
-	struct plist* restrict pl;
+	/* AI to invoke for each player slot */
+	uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict);
 };
 
 

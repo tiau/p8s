@@ -13,6 +13,10 @@
 #define BADPNUM 2
 #define BADGNUM 3
 
-int main(int argc, char* argv[]) __attribute__((cold));
+/* These are global so our signal handler can get at them */
+static size_t nplayers = 0, ngames = 1, offset = 0;
+static size_t* victories = 0;
+
+int main(int argc, char* argv[]);
 
 #endif /* P8_H */

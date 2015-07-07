@@ -1,10 +1,25 @@
 #include <string.h>
 #include <search.h>
+#include <math.h>
 #include "io.h"
 #include "movegen.h"
 
 #ifndef ENGINE_H
 #define ENGINE_H
+
+double se(const double p,
+		  const size_t n1,
+		  const size_t n2)
+	__attribute__((hot,const));
+
+double z(const double p1,
+		 const double p2,
+		 const size_t n1,
+		 const size_t n2)
+	__attribute__((hot,const));
+
+double phi(double x)
+	__attribute__((hot,const));
 
 void cshuffle(card_t* const restrict cards,
 			  const size_t s,
@@ -17,7 +32,7 @@ void populateCIH(const struct gamestate* const restrict gs,
 
 void initGameState(struct gamestate* const restrict gs,
 				   const size_t nplayers,
-				   const uint8_t* const restrict ai)
+				   uint_fast32_t (* const ai[MAXPLRS])(const struct aistate* const restrict))
 	__attribute__((nonnull,cold));
 
 void cleanGameState(struct gamestate* const restrict gs)
@@ -42,7 +57,7 @@ float gameLoop(struct gamestate* const restrict gs,
 			  const uint8_t verbose,
 			  bool eight,
 			  bool magic,
-			  uint_fast32_t (*aif[MAXPLRS])(const struct aistate* const restrict))
+			  const size_t offset)
 	__attribute__((hot,nonnull));
 
 __attribute__((nonnull,hot))

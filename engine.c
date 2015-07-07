@@ -1,5 +1,31 @@
 #include "engine.h"
 
+double se(const double p, const size_t n1, const size_t n2)
+{
+	return sqrt(p / (n1+n2) * (1-p / (n1+n2)) * (1.0/n1 + 1.0/n2));
+}
+
+double z(const double p1, const double p2, const size_t n1, const size_t n2)
+{
+	return (p1/n1 - p2/n2) / se(p1+p2, n1, n2);
+}
+
+double phi(double x)
+{
+	static const double a1 =  0.254829592;
+	static const double a2 = -0.284496736;
+	static const double a3 =  1.421413741;
+	static const double a4 = -1.453152027;
+	static const double a5 =  1.061405429;
+	static const double p  =  0.3275911;
+
+	const int sign = (x < 0) ? -1 : 1;
+	x = fabs(x)/sqrt(2.0);
+	const double t = 1.0/(1.0 + p*x);
+	const double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
+	return 0.5*(1.0 + sign*y);
+}
+
 void populateCIH(const struct gamestate* const restrict gs, size_t* const restrict cih)
 {
 	size_t i, j;
@@ -59,7 +85,7 @@ __attribute__((nonnull,hot)) inline static void deal(struct gamestate* const res
 	}
 }
 
-void initGameState(struct gamestate* const restrict gs, const size_t nplayers, const uint8_t* const restrict ai)
+void initGameState(struct gamestate* const restrict gs, const size_t nplayers, uint_fast32_t (* const ai[MAXPLRS])(const struct aistate* const restrict))
 {
 	{	assert(gs);
 		assert(nplayers >= MINPLRS && nplayers <= MAXPLRS);}
@@ -76,7 +102,7 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, c
 	gs->turn = 0;
 	gs->eightSuit = Unknown;
 	gs->magic = false;
-	gs->ai = ai;
+	memcpy(gs->ai, ai, nplayers * sizeof(uint_fast32_t (*const)(const struct aistate* const restrict)));
 }
 
 void cleanGameState(struct gamestate* const restrict gs)
@@ -168,7 +194,7 @@ bool drawCard(struct gamestate* const restrict gs)
 	return r;
 }
 
-float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool eight, bool magic, uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict))
+float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool eight, bool magic, const size_t offset)
 {
 	size_t i;
 	const struct play* play;
@@ -185,7 +211,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 		gs->drew = !gs->deck.n;
 
 		if(unlikely(verbose)) {
-			showGameState(gs);
+			showGameState(gs, offset);
 			if(verbose > 1) {
 				printf("Deck ");
 				showDeck(&gs->deck);
@@ -223,7 +249,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 						showPlay(plistGet(as.pl, i));
 					printf("%s \n", ANSI_BACK);
 				}
-				ptm = (*aia[gs->turn % gs->nplayers])(&as);
+				ptm = (*gs->ai[gs->turn % gs->nplayers])(&as);
 			} else {
 				MPACK(ptm, 0);
 			}

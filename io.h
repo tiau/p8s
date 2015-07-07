@@ -37,11 +37,12 @@ void showDeck(const struct deck* const deck)
 void showPile(const struct deck* const pile)
 	__attribute__((nonnull,cold));
 
-void showGameState(const struct gamestate* const restrict gs)
+void showGameState(const struct gamestate* const restrict gs,
+				   const size_t offset)
 	__attribute__((nonnull,cold));
 
 int getGameState(const struct gamestate* const restrict gs)
-	__attribute__((cold,nonnull,pure));
+	__attribute__((nonnull,pure));
 
 card_t readCard(const char* const restrict str)
 	__attribute__((nonnull,pure,cold));

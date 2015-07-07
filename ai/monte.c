@@ -56,7 +56,6 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 	bool e;			// Whether we're testing a suit
 	struct gamestate gs;
 	bool magic = likely(forces == Unknown && gtp);
-	uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict);
 
 	{	assert(ngames);
 		assert(forces <= Unknown);
@@ -64,7 +63,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
 
 	for(i = 0; i < as->gs->nplayers; i++)
-		aia[i] = aif;
+		gs.ai[i] = aif;
 
 	for(i = 0; i < ngames; i++) {
 		(*initgs)(&gs, as->gs);
@@ -95,7 +94,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 			break;
 		}
 		// TODO use silly magic about win distance to select better plays?
-		ret += (gameLoop(&gs, false, e, magic, aia) > 0.0);
+		ret += (gameLoop(&gs, false, e, magic, 0) > 0.0);
 
 		cleanGameState(&gs);
 	}
@@ -197,10 +196,11 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 	size_t hmg = 20;	// How many games to play the first round
 	bool dead[nump];
 	float scores[nump];
-	float best, ath, co;
+	float best, ath;
 	size_t tt, btn;
 	size_t act = nump;
 	size_t times = 1;
+	float phiv;
 
 	memset(dead, 0, sizeof(bool)*nump);
 
@@ -224,6 +224,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 			usleep(4000);
 		}
 
+		size_t bwins = 0;
 		pthread_rwlock_rdlock(s->rwl);
 		best = -1.0;
 		btn = 0;
@@ -232,6 +233,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				continue;
 			tt = s->trials[j];
 			if((scores[j] = (float)s->wins[j] / (float)tt) > best) {
+				bwins = s->wins[j];
 				best = scores[j];
 				btn = tt;
 			}
@@ -242,15 +244,14 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				continue;
 			tt = s->trials[j];
 			ath = min(tt, btn);
-			if(ath < 5)
+			if(ath < 10)
 				continue;
-			// TODO tune these floats
-			co = 6.1*log(ath)/pow((double)ath, 1.1);
-			if(best - scores[j] > co || tt > MAXGAMES || act == 1) {
+			phiv = phi(z(s->wins[j], bwins, tt, btn));
+			if(phiv < POBM || tt > MAXGAMES || act == 1) {
 				dead[j] = true;
 				act--;
 #ifdef MONTE_VERBOSE
-				printf("%smonte:%s  %zu\t(%.1f%% :: %.1f / %.1f)\t%.1f%%\t", ANSI_CYAN, ANSI_DEFAULT, j, 100.0*((float)tt) / (float)MAXGAMES, 100.0* (best - scores[j]), 100.0*co, 100.0*scores[j]);
+				printf("%smonte:%s  %zu\t(%.1f%%\t%.1f%%)\t%.1f%%\t", ANSI_CYAN, ANSI_DEFAULT, j, 100*phiv, 100.0*((float)tt) / (float)MAXGAMES, 100.0*scores[j]);
 				if(j+1 == nump)
 					printf("(%s)  ", ((s->as->gs->drew) ? "pass" : "draw"));
 				else

@@ -1,5 +1,58 @@
 #include "p8.h"
 
+__attribute__((nonnull)) static void swapSt(size_t* a, size_t* b)
+{
+	size_t t = *a;
+	*a = *b;
+	*b = t;
+}
+
+__attribute__((nonnull)) static void swapAi(uint_fast32_t (**a)(const struct aistate* const restrict), uint_fast32_t (**b)(const struct aistate* const restrict))
+{
+	uint_fast32_t (*t)(const struct aistate* const restrict) = *a;
+	*a = *b;
+	*b = t;
+}
+
+__attribute__((nonnull)) static void reverseSt(size_t* a, size_t* b)
+{
+	while(--b > a)
+		swapSt(a++, b);
+}
+
+__attribute__((nonnull)) static void reverseAi(uint_fast32_t (**a)(const struct aistate* const restrict), uint_fast32_t (**b)(const struct aistate* const restrict))
+{
+	while(--b > a)
+		swapAi(a++, b);
+}
+
+__attribute__((nonnull)) static void rotateSt(size_t* const restrict ar, const size_t s, const size_t by)
+{
+	reverseSt(ar, ar + s);
+	reverseSt(ar, ar + by);
+	reverseSt(ar + by, ar + s);
+}
+
+__attribute__((nonnull)) static void rotateAi(uint_fast32_t (**ar)(const struct aistate* const restrict), const size_t s, const size_t by)
+{
+	reverseAi(ar, ar + s);
+	reverseAi(ar, ar + by);
+	reverseAi(ar + by, ar + s);
+}
+
+__attribute__((cold)) static void showStats(void)
+{
+	size_t i, j;
+
+	rotateSt(victories, nplayers, nplayers - offset);
+	printf("\n");
+	for(i = 0; i < nplayers; i++)
+		printf("Player %zu won %zu games (%.1f%%)\n", i, victories[i], 100.0*victories[i]/ngames);
+	for(i = 0; i < nplayers; i++)
+		for(j = i + 1;  j < nplayers; j++)
+			printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(victories[i], victories[j], ngames, ngames)));
+}
+
 __attribute__((cold,noreturn)) static void sigintQueueClean(int sig)
 {
 	char pidstr[12];
@@ -8,6 +61,10 @@ __attribute__((cold,noreturn)) static void sigintQueueClean(int sig)
 	printf("\n");
 	snprintf(pidstr, 12, "/p8s-%i", pid);
 	mq_unlink(pidstr);
+	if(victories) {
+		showStats();
+		free(victories);
+	}
 	exit(sig);
 }
 
@@ -50,7 +107,7 @@ __attribute__((cold,nonnull)) static bool verifyHypoGame(const struct gamestate*
 	return true;
 }
 
-__attribute__((nonnull)) static void initGameStateHypoMain(struct gamestate* const restrict gs, struct gamestate* const restrict igs, const uint8_t* const restrict ai, const struct player* const restrict tplayer, const size_t nplayers, const size_t wp)
+__attribute__((nonnull)) static void initGameStateHypoMain(struct gamestate* const restrict gs, struct gamestate* const restrict igs, uint_fast32_t (* const ai[MAXPLRS])(const struct aistate* const restrict), const struct player* const restrict tplayer, const size_t wp)
 {
 	size_t i, j;
 
@@ -60,7 +117,7 @@ __attribute__((nonnull)) static void initGameStateHypoMain(struct gamestate* con
 		assert(tplayer);
 		assert(nplayers);}
 
-	gs->ai = ai;
+	memcpy(gs->ai, ai, nplayers * sizeof(uint_fast32_t (* const)(const struct aistate* const restrict)));
 
 	initDeckSans(&gs->deck, tplayer, &igs->pile);
 
@@ -86,14 +143,13 @@ __attribute__((nonnull)) static void initGameStateHypoMain(struct gamestate* con
 
 int main(int argc, char* argv[])
 {
-	size_t i, ngames = 1, nplayers = 0;
-	uint8_t ai[MAXPLRS] = { 255 };
+	size_t i, wp = 0;
 	uint8_t verbose = 0;
 	int c, ti;
-	size_t wp = 0;
 	struct gamestate igs;
 	bool hypo = false, hv = false;
-	uint_fast32_t (*aia[MAXPLRS])(const struct aistate* const restrict);
+	bool rot = false;
+	uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict) = { NULL };
 
 	assert(CPP * MAXPLRS < DECKLEN);
 
@@ -101,17 +157,17 @@ int main(int argc, char* argv[])
 	igs.players = calloc(MAXPLRS, sizeof(struct player));
 
 	opterr = 0;
-	while((c = getopt(argc, argv, "m:g:p:h:v")) != -1) {
+	while((c = getopt(argc, argv, "m:g:p:h:vr")) != -1) {
 		switch(c) {
 			case 'm':
-				ti = 48;
+				ti = '0';
 				for(i = 0, nplayers = 0; i < strlen(optarg); i++) {
 					if(isdigit(optarg[i])) {
 						if(!(optarg[i] - ti)) {
 							verbose = (!verbose) ? 1 : verbose;
 							ti++;
 						}
-						ai[nplayers++] = optarg[i] - 48;
+						ai[nplayers++] = ais[optarg[i] - '0'];
 					}
 				}
 				if(nplayers < MINPLRS || nplayers > MAXPLRS) {
@@ -150,6 +206,9 @@ int main(int argc, char* argv[])
 						verbose++;
 					hv = true;
 					break;
+			case 'r':
+					rot = true;
+					break;
 			case '?':
 				if(optopt == 'm' || optopt == 'g' || optopt == 'v')
 					fprintf(stderr, "Option -%c requires an integer argument\n", optopt);
@@ -160,10 +219,11 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if(!nplayers || ai[0] == 255 || nplayers < wp || !verifyHypoGame(&igs, wp)) {
+	if(!nplayers || ai[0] == NULL || nplayers < wp || !verifyHypoGame(&igs, wp)) {
 		fprintf(stderr, "Usage: %s -m nn[nn] [-g n] [-v] [-p cards] [-h cards] [-d cards]\nOptions:\n", 1+rindex(*argv, '/'));
 		fprintf(stderr, "\t-m Modes (e.g. -m00, -m124)\n");
 		fprintf(stderr, "\t-g Number of games to play\n");
+		fprintf(stderr, "\t-r Rotate player positions each game (hides signal from positional advantage)\n");
 		fprintf(stderr, "\t-v Verbose (specify multiple times for more verbosity, e.g. -vv)\n");
 		fprintf(stderr, "\t-p Specific pile to use, (e.g. AH or \"AH 7H 7D 0D\")\n");
 		fprintf(stderr, "\t-h Specific hand to use, give multiple hands with more -h's\n");
@@ -172,8 +232,7 @@ int main(int argc, char* argv[])
 		return BADARGS;
 	}
 
-	size_t victories[nplayers];
-	memset(victories, 0, nplayers * sizeof(size_t));
+	victories = calloc(nplayers, sizeof(size_t));
 
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -186,9 +245,6 @@ int main(int argc, char* argv[])
 #ifndef NDEBUG
 	signal(SIGABRT, sigintQueueClean);
 #endif
-
-	for(i = 0; i < nplayers; i++)
-		aia[i] = ais[ai[i]];
 
 	struct player tplayer;
 	if(hypo) {
@@ -206,22 +262,25 @@ int main(int argc, char* argv[])
 	struct gamestate gs;
 	for(i = 0; i < ngames; i++) {
 		if(hypo)
-			initGameStateHypoMain(&gs, &igs, ai, &tplayer, nplayers, wp);
+			initGameStateHypoMain(&gs, &igs, ai, &tplayer, wp);
 		else
 			initGameState(&gs, nplayers, ai);
 
-		gameLoop(&gs, verbose, false, false, aia);
-		showGameState(&gs);
+		gameLoop(&gs, verbose, false, false, offset);
+		showGameState(&gs, offset);
 		victories[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
 		cleanGameState(&gs);
+		if(rot) {
+			rotateAi(ai, nplayers, 1);
+			rotateSt(victories, nplayers, 1);
+			offset = (offset + 1) % nplayers;
+		}
 	}
 
-	if(ngames > 1) {
-		printf("\n");
-		for(i = 0; i < nplayers; i++)
-			printf("Player %zu won %zu games (%.1f%%)\n", i, victories[i], 100.0*victories[i]/ngames);
-	}
+	if(ngames > 1)
+		showStats();
 
+	free(victories);
 	free(igs.players);
 	return SUCCESS;
 }

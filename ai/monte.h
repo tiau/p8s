@@ -2,7 +2,6 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <mqueue.h>
-#include <math.h>
 #include "draw.h"
 
 /* The Monte (Carlo) AI runs a whole bunch of games for each possible play it
@@ -27,6 +26,10 @@
 
 /* What AI to call to play hypothetical games */
 #define MONTEAIF aiJudge
+
+/* The probability that apparently worse move a is actually better than best
+ * apparent move b at which we cut off a from further computation */
+#define POBM 0.01
 
 /* Maximum number of hypothetical games to play for a each possible move */
 #define MAXGAMES 9999

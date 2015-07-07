@@ -91,7 +91,7 @@ void showPile(const struct deck* const pile)
 	printf("%s%s*%s\n", ANSI_BACK, ANSI_WHITE, ANSI_DEFAULT);
 }
 
-void showGameState(const struct gamestate* const restrict gs)
+void showGameState(const struct gamestate* const restrict gs, const size_t offset)
 {
 	assert(gs);
 
@@ -108,7 +108,7 @@ void showGameState(const struct gamestate* const restrict gs)
 		default:
 			assert(false);
 	}
-	printf(", %sTurn %s%zu%s (player %s%zu%s)\n", ANSI_DEFAULT, ANSI_WHITE, gs->turn, ANSI_DEFAULT, ANSI_WHITE, (gs->turn - (!getGameState(gs) ? 1 : 0)) % gs->nplayers, ANSI_DEFAULT);
+	printf(", %sTurn %s%zu%s (player %s%zu%s)\n", ANSI_DEFAULT, ANSI_WHITE, gs->turn, ANSI_DEFAULT, ANSI_WHITE, (gs->turn + offset - (!getGameState(gs) ? 1 : 0)) % gs->nplayers, ANSI_DEFAULT);
 }
 
 int getGameState(const struct gamestate* const restrict gs)

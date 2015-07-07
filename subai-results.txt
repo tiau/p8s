@@ -1,0 +1,7 @@
+(vs.)		monte	judge	cheat
+monte		51%		57%		41.4%
+judge		44%		50%		29%
+mfirst		30%		37%
+mrandom		43%		49%
+mshedder	45%		52%
+mdraw		49%		56%		40.5%

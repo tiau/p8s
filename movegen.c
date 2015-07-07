@@ -103,9 +103,10 @@ struct plist* getPotentials(const struct gamestate* const restrict gs, const str
 		assert(player);}
 
 	pl = plistNew();
-	initMoveTable(&mt);
+	initMoveTable(&mt, player->n);
 	for(i = 1; i <= min(player->n, MAXCIP); i++)
 		nComboPermute(gs, player, i, pl, &mt);
+	freeMoveTable(&mt);
 
 	return pl;
 }

@@ -48,9 +48,10 @@ __attribute__((cold)) static void showStats(void)
 	printf("\n");
 	for(i = 0; i < nplayers; i++)
 		printf("Player %zu won %zu games (%.1f%%)\n", i, victories[i], 100.0*victories[i]/ngames);
-	for(i = 0; i < nplayers; i++)
-		for(j = i + 1;  j < nplayers; j++)
-			printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(victories[i], victories[j], ngames, ngames)));
+	if(ngames > 9)
+		for(i = 0; i < nplayers; i++)
+			for(j = i + 1;  j < nplayers; j++)
+				printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(victories[i], victories[j], ngames, ngames)));
 }
 
 __attribute__((cold,noreturn)) static void sigintQueueClean(int sig)

@@ -1,16 +1,19 @@
 #include "mhash.h"
 
-__attribute__((pure,nonnull,hot)) static uint_fast16_t mHash(const struct play* const restrict play)
+__attribute__((pure,nonnull,hot)) static uint_fast16_t mHash(const struct play* const restrict play, const uint_fast16_t s)
 {
 	size_t i;
 	uint_fast16_t hash = 0;
+
+	{	assert(play);
+		assert(play->n && play->n <= MAXCIP);}
 
 	hash = play->c[play->n-1];
 	hash <<= 8;
 	for(i = 0; i < play->n-1; i++)
 		hash ^= play->c[i];
 
-	return hash % MT_SIZE;
+	return hash % s;
 }
 
 __attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* const restrict p1, const struct play* const restrict p2)
@@ -19,7 +22,8 @@ __attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* c
 	size_t matches = 0;
 
 	{	assert(p1);
-		assert(p2);}
+		assert(p2);
+		assert(p1->n && p1->n <= MAXCIP);}
 
 	if(p1->n != p2->n || p1->c[p1->n-1] != p2->c[p1->n-1])
 		return false;
@@ -39,38 +43,37 @@ __attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* c
 
 __attribute__((pure,nonnull,hot)) static const struct play* nextSlot(const struct mTable* const restrict mt, const struct play* const restrict play)
 {
-	const struct play *t, *tt;
-
 	{	assert(mt);
-		assert(play);}
+		assert(play);
+		assert(play->n && play->n <= MAXCIP);}
 
-	tt = &mt->table[mHash(play)];
-	t = tt;
+	const struct play* const start = &mt->table[mHash(play, mt->s)];
+	const struct play* t = start;
 	while(t->n) {
 		if(isEqualEnough(t, play)) // Play is already present
 			return NULL;
-		t = (t - mt->table > MT_SIZE) ? mt->table : t + 1;
-		if(unlikely(t == tt)) {
-			fprintf(stderr, "%s: Move hash table is full.\n", __func__);
+		t = ((size_t)(t - mt->table) >= mt->s) ? mt->table : t + 1;
+		if(unlikely(t == start)) {
+			fprintf(stderr, "%s: Move hash table (%zu slots) is full.\n", __func__, mt->s);
 			return NULL;
 		}
 	}
 	return t;
 }
 
-void initMoveTable(struct mTable* const restrict mt)
+void initMoveTable(struct mTable* const restrict mt, size_t hint)
 {
-	assert(mt);
-
-	memset(mt->table, 0, MT_SIZE * sizeof(struct play));
-	mt->n = 0;
+	const uint_fast16_t s = min(4096, powf(2, hint+1));
+	mt->table = calloc(s, sizeof(struct play));
+	mt->s = s - 1;
 }
 
 void addMove(struct mTable* const restrict mt, const struct play* const restrict play)
 {
 	{	assert(mt);
-		assert(play);}
-
+		assert(play);
+		assert(play->n);
+		assert(play->n <= MAXCIP);}
 	struct play* const t = (struct play*)nextSlot(mt, play);
 	if(t) *t = *play;
 }
@@ -78,7 +81,8 @@ void addMove(struct mTable* const restrict mt, const struct play* const restrict
 bool lookupMove(const struct mTable* const restrict mt, const struct play* const restrict play)
 {
 	{	assert(mt);
-		assert(play);}
-
+		assert(play);
+		assert(play->n);
+		assert(play->n <= MAXCIP);}
 	return nextSlot(mt, play) == NULL;
 }

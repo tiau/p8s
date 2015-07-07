@@ -48,10 +48,12 @@ __attribute__((cold)) static void showStats(void)
 	printf("\n");
 	for(i = 0; i < nplayers; i++)
 		printf("Player %zu won %zu games (%.1f%%)\n", i, victories[i], 100.0*victories[i]/ngames);
-	if(ngames > 9)
+	if(ngames > 9) {
+		printf("\n");
 		for(i = 0; i < nplayers; i++)
 			for(j = i + 1;  j < nplayers; j++)
 				printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(victories[i], victories[j], ngames, ngames)));
+	}
 }
 
 __attribute__((cold,noreturn)) static void sigintQueueClean(int sig)
@@ -142,7 +144,7 @@ __attribute__((hot,nonnull)) static void initGameStateHypoMain(struct gamestate*
 	}
 }
 
-__attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamestate* const restrict igs, const size_t wp, const bool rot, const bool verbose, uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict))
+__attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamestate* const restrict igs, const size_t wp, const bool rot, const uint8_t verbose, uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict))
 {
 	size_t i, j;
 	struct player tplayer;

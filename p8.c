@@ -108,7 +108,7 @@ __attribute__((cold,nonnull)) static bool verifyHypoGame(const struct gamestate*
 	return true;
 }
 
-__attribute__((nonnull)) static void initGameStateHypoMain(struct gamestate* const restrict gs, struct gamestate* const restrict igs, uint_fast32_t (* const ai[MAXPLRS])(const struct aistate* const restrict), const struct player* const restrict tplayer, const size_t wp)
+__attribute__((hot,nonnull)) static void initGameStateHypoMain(struct gamestate* const restrict gs, struct gamestate* const restrict igs, uint_fast32_t (* const ai[MAXPLRS])(const struct aistate* const restrict), const struct player* const restrict tplayer, const size_t wp)
 {
 	size_t i, j;
 
@@ -142,6 +142,43 @@ __attribute__((nonnull)) static void initGameStateHypoMain(struct gamestate* con
 	}
 }
 
+__attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamestate* const restrict igs, const size_t wp, const bool rot, const bool verbose, uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict))
+{
+	size_t i, j;
+	struct player tplayer;
+	struct gamestate gs;
+
+	if(hypo) {
+		igs->nplayers = nplayers;
+		igs->eightSuit = Unknown;
+
+		tplayer.n = 0;
+		for(i = 0; i < wp; i++)
+			for(j = 0; j < igs->players[i].n; j++)
+				tplayer.c[tplayer.n++] = igs->players[i].c[j];
+	}
+
+	for(i = 0; i < ngames; i++) {
+		if(hypo)
+			initGameStateHypoMain(&gs, igs, ai, &tplayer, wp);
+		else
+			initGameState(&gs, nplayers, ai);
+
+		gameLoop(&gs, verbose, false, false, offset);
+		showGameState(&gs, offset);
+		victories[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
+		cleanGameState(&gs);
+		if(rot) {
+			rotateAi(ai, nplayers, 1);
+			rotateSt(victories, nplayers, 1);
+			offset = (offset + 1) % nplayers;
+		}
+	}
+
+	if(ngames > 1)
+		showStats();
+}
+
 int main(int argc, char* argv[])
 {
 	size_t i, wp = 0;
@@ -173,14 +210,14 @@ int main(int argc, char* argv[])
 				}
 				if(nplayers < MINPLRS || nplayers > MAXPLRS) {
 					fprintf(stderr, "Player count (%zu) must be no less than %i and no greater than %i\n", nplayers, MINPLRS, MAXPLRS);
-					return BADPNUM;
+					return BADARGS;
 				}
 				break;
 			case 'g':
 					ngames = atoi(optarg);
 					if(ngames < 1) {
 						fprintf(stderr, "Number of games (%zu) must be no less than 1\n", ngames);
-						return BADGNUM;
+						return BADARGS;
 					}
 					break;
 			case 'p':
@@ -195,7 +232,7 @@ int main(int argc, char* argv[])
 					hypo = true;
 					if(wp >= MAXPLRS) {
 						fprintf(stderr, "Only %i hands or fewer may be specified\n", MAXPLRS);
-						return BADPNUM;
+						return BADARGS;
 					}
 					for(i = 0; i <= strlen(optarg)/3; i++) {
 						igs.players[wp].c[i] = readCard(optarg + i*3);
@@ -233,8 +270,6 @@ int main(int argc, char* argv[])
 		return BADARGS;
 	}
 
-	victories = calloc(nplayers, sizeof(size_t));
-
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	srand(tv.tv_sec + tv.tv_usec);
@@ -247,41 +282,10 @@ int main(int argc, char* argv[])
 	signal(SIGABRT, sigintQueueClean);
 #endif
 
-	struct player tplayer;
-	if(hypo) {
-		size_t j;
-
-		igs.nplayers = nplayers;
-		igs.eightSuit = Unknown;
-
-		tplayer.n = 0;
-		for(i = 0; i < wp; i++)
-			for(j = 0; j < igs.players[i].n; j++)
-				tplayer.c[tplayer.n++] = igs.players[i].c[j];
-	}
-
-	struct gamestate gs;
-	for(i = 0; i < ngames; i++) {
-		if(hypo)
-			initGameStateHypoMain(&gs, &igs, ai, &tplayer, wp);
-		else
-			initGameState(&gs, nplayers, ai);
-
-		gameLoop(&gs, verbose, false, false, offset);
-		showGameState(&gs, offset);
-		victories[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
-		cleanGameState(&gs);
-		if(rot) {
-			rotateAi(ai, nplayers, 1);
-			rotateSt(victories, nplayers, 1);
-			offset = (offset + 1) % nplayers;
-		}
-	}
-
-	if(ngames > 1)
-		showStats();
-
+	victories = calloc(nplayers, sizeof(size_t));
+	runGames(hypo, &igs, wp, rot, verbose, ai);
 	free(victories);
 	free(igs.players);
+
 	return SUCCESS;
 }

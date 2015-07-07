@@ -91,6 +91,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 
 		if(unlikely(!gs.players[0].n)) {
 			ret += ngames;
+			cleanGameState(&gs);
 			break;
 		}
 		// TODO use silly magic about win distance to select better plays?
@@ -247,7 +248,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 			if(ath < 10)
 				continue;
 			phiv = phi(z(s->wins[j], bwins, tt, btn));
-			if(phiv < POBM || tt > MAXGAMES || act == 1) {
+			if(phiv < PIBM || tt > MAXGAMES || act == 1) {
 				dead[j] = true;
 				act--;
 #ifdef MONTE_VERBOSE

@@ -10,8 +10,6 @@
 /* main() return codes */
 #define SUCCESS 0
 #define BADARGS 1
-#define BADPNUM 2
-#define BADGNUM 3
 
 /* These are global so our signal handler can get at them */
 static size_t nplayers = 0, ngames = 1, offset = 0;

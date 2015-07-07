@@ -27,9 +27,9 @@
 /* What AI to call to play hypothetical games */
 #define MONTEAIF aiJudge
 
-/* The probability that apparently worse move a is actually better than best
- * apparent move b at which we cut off a from further computation */
-#define POBM 0.01
+/* The probability that apparently worse move W is actually better than best
+ * apparent move B at which we cut off W from further computation */
+#define PIBM 0.01
 
 /* Maximum number of hypothetical games to play for a each possible move */
 #define MAXGAMES 9999

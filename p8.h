@@ -13,8 +13,6 @@
 
 /* These are global so our signal handler can get at them */
 static size_t nplayers = 0, ngames = 1, offset = 0;
-static size_t* victories = 0;
-
-int main(int argc, char* argv[]);
+static size_t* successes = 0;
 
 #endif /* P8_H */

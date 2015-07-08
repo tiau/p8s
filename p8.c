@@ -42,15 +42,15 @@ __attribute__((cold)) static void showStats(void)
 {
 	size_t i, j;
 
-	rotateSt(victories, nplayers, nplayers - offset);
+	rotateSt(successes, nplayers, nplayers - offset);
 	printf("\n");
 	for(i = 0; i < nplayers; i++)
-		printf("Player %zu won %zu games (%.1f%%)\n", i, victories[i], 100.0*victories[i]/ngames);
+		printf("Player %zu won %zu games (%.1f%%)\n", i, successes[i], 100.0*successes[i]/ngames);
 	if(ngames > 9) {
 		printf("\n");
 		for(i = 0; i < nplayers; i++)
 			for(j = i + 1;  j < nplayers; j++)
-				printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(victories[i], victories[j], ngames, ngames)));
+				printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(successes[i], successes[j], ngames, ngames)));
 	}
 }
 
@@ -62,9 +62,9 @@ __attribute__((cold,noreturn)) static void sigintQueueClean(int sig)
 	printf("\n");
 	snprintf(pidstr, 12, "/p8s-%i", pid);
 	mq_unlink(pidstr);
-	if(victories) {
+	if(successes) {
 		showStats();
-		free(victories);
+		free(successes);
 	}
 	exit(sig);
 }
@@ -166,11 +166,11 @@ __attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamest
 
 		gameLoop(&gs, verbose, false, false, offset);
 		showGameState(&gs, offset);
-		victories[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
+		successes[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
 		cleanGameState(&gs);
 		if(rot) {
 			rotateAi(ai, nplayers, 1);
-			rotateSt(victories, nplayers, 1);
+			rotateSt(successes, nplayers, 1);
 			offset = (offset + 1) % nplayers;
 		}
 	}
@@ -282,9 +282,9 @@ int main(int argc, char* argv[])
 	signal(SIGABRT, sigintQueueClean);
 #endif
 
-	victories = calloc(nplayers, sizeof(size_t));
+	successes = calloc(nplayers, sizeof(size_t));
 	runGames(hypo, &igs, wp, rot, verbose, ai);
-	free(victories);
+	free(successes);
 	free(igs.players);
 
 	return SUCCESS;

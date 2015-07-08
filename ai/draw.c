@@ -52,7 +52,6 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 			tp.c[tp.n++] = *td.top++;
 			hmb += (evalPlayer(&tp, as->gs->nplayers) + 5 < cur);
 		}
-
 	/* We can't draw, so only consider passing if we can only make one play and
 	 * that play ends in an eight and the next player has more than one card */
 	} else if(as->pl->n == 1 &&

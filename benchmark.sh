@@ -7,7 +7,7 @@ echo "Benchmarking..."
 
 x=""
 for i in `seq $nt` ; do
-	n="$(./time ./p8 -m3453 -g$gs 2>&1 | grep user | sed 's/^.*\ *0m\([0-9\.]*\)s$/\1/')"
+	n="$(./time.sh ./p8 -m3453 -g$gs 2>&1 | grep user | sed 's/^.*\ *0m\([0-9\.]*\)s$/\1/')"
 	x="$x $n"
 done
 

@@ -138,7 +138,7 @@ int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplay
 			ret -= 2.0 / (((cn - 1.0) / 3.0) + .5);
 		else if(cv == 3)
 			ret -= (nplayers > 2) ? cnn > 4.0 : 1;
-		else if(cv == 8)
+		else if(cv == 8 && i != 0)
 			ret -= 4 + (cn > 4.0);
 	}
 
@@ -152,6 +152,7 @@ uint_fast32_t aiJudge(const struct aistate* const restrict as)
 	struct player tplayer;
 	const struct play* play;
 	ssize_t ep, best = 32767;
+	ssize_t playereval, moveeval;
 	suit_t bestsuit;
 	uint_fast32_t ret = 0;
 
@@ -171,8 +172,9 @@ uint_fast32_t aiJudge(const struct aistate* const restrict as)
 		play = plistGet(as->pl, i);
 		removeCards(&tplayer, play);
 		bestsuit = freqSuit(&tplayer);
-		ep = evalPlayer(&tplayer, as->gs->nplayers) -
-			 evalPlay(play, as->gs->nplayers, cih, bestsuit);
+		playereval = evalPlayer(&tplayer, as->gs->nplayers);
+		moveeval = evalPlay(play, as->gs->nplayers, cih, bestsuit);
+		ep = playereval - moveeval;
 
 		if(ep < best) {
 			MPACK(ret, i);
@@ -181,7 +183,7 @@ uint_fast32_t aiJudge(const struct aistate* const restrict as)
 		}
 
 #ifdef JUDGE_VERBOSE
-		printf("%sjudge:%s\t%zu\t score \t%zi\t", ANSI_CYAN, ANSI_DEFAULT, i, ep);
+		printf("%sjudge:%s\t%zu\t%zi\t%zi\t%zi\t", ANSI_CYAN, ANSI_DEFAULT, i, playereval, moveeval, ep);
 		showPlay(play);
 		printf("%s %s\n", ANSI_BACK, ANSI_DEFAULT);
 #endif

@@ -1,2 +1,2 @@
-- Update README to reflect new monte output
+- Update README to reflect changed monte output / new arguments to main
 - Switch monte to C11 atomics to see if faster

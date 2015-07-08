@@ -16,14 +16,12 @@ __attribute__((nonnull)) static void swapAi(uint_fast32_t (**a)(const struct ais
 
 __attribute__((nonnull)) static void reverseSt(size_t* a, size_t* b)
 {
-	while(--b > a)
-		swapSt(a++, b);
+	while(--b > a) swapSt(a++, b);
 }
 
 __attribute__((nonnull)) static void reverseAi(uint_fast32_t (**a)(const struct aistate* const restrict), uint_fast32_t (**b)(const struct aistate* const restrict))
 {
-	while(--b > a)
-		swapAi(a++, b);
+	while(--b > a) swapAi(a++, b);
 }
 
 __attribute__((nonnull)) static void rotateSt(size_t* const restrict ar, const size_t s, const size_t by)

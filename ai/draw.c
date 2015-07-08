@@ -57,11 +57,11 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	 * that play ends in an eight and the next player has more than one card */
 	} else if(as->pl->n == 1 &&
 			  getVal(plistGet(as->pl, 0)->c[0]) == 8 &&
-			  as->gs->players[(p - as->gs->players) % as->gs->nplayers].n > 1) {
+			  as->gs->players[(p + 1 - as->gs->players) % as->gs->nplayers].n > 1) {
 		while(td.n--) {
 			c = *td.top++;
 			fs = getSuit(c);
-			hmb += 0.15 + (fs == as->gs->eightSuit ||
+			hmb += 0.05 + (fs == as->gs->eightSuit ||
 					      (as->gs->eightSuit == Unknown && fs == ns) ||
 					      getVal(c) == 8 ||
 					      getVal(c) == nv);
@@ -71,7 +71,7 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	if(hmb/ds > 0.5f)
 		MPACK(ret, as->pl->n);
 #ifdef JUDGE_VERBOSE
-	printf("%sdraw:%s\t%zu\t score \t%.2f\t%s\n", ANSI_CYAN, ANSI_DEFAULT, as->pl->n, hmb/ds, (as->gs->drew) ? "draw" : "pass");
+	printf("%sdraw:%s\t%zu\t\t\t%.2f\t%s\n", ANSI_CYAN, ANSI_DEFAULT, as->pl->n, hmb/ds, (as->gs->drew) ? "pass" : "draw");
 #endif
 	return ret;
 }

@@ -83,25 +83,25 @@ struct gamestate {
 __attribute__((hot,const,always_inline))
 inline static suit_t getSuit(const card_t c)
 {
+	assert(c > 0 && c <= DECKLEN);
 	/* Lookup tables are much faster than computation for this and getVal */
 	static const suit_t vals[] = {Unknown,
 								  0,0,0,0,0,0,0,0,0,0,0,0,0,
 								  1,1,1,1,1,1,1,1,1,1,1,1,1,
 								  2,2,2,2,2,2,2,2,2,2,2,2,2,
 								  3,3,3,3,3,3,3,3,3,3,3,3,3};
-	assert((c-1)/(DECKLEN/4) == vals[c]);
 	return vals[c];
 }
 
 __attribute__((hot,const,always_inline))
 inline static card_t getVal(const card_t c)
 {
+	assert(c > 0 && c <= DECKLEN);
 	static const card_t vals[] = {0,
 								  1,2,3,4,5,6,7,8,9,10,11,12,13,
 								  1,2,3,4,5,6,7,8,9,10,11,12,13,
 								  1,2,3,4,5,6,7,8,9,10,11,12,13,
 								  1,2,3,4,5,6,7,8,9,10,11,12,13};
-	assert(((c-1) % (DECKLEN/4)) + 1 == vals[c]);
 	return vals[c];
 }
 

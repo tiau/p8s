@@ -164,7 +164,7 @@ __attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamest
 		else
 			initGameState(&gs, nplayers, ai);
 
-		gameLoop(&gs, verbose, false, false, offset);
+		gameLoop(&gs, verbose, false, offset);
 		showGameState(&gs, offset);
 		successes[(gs.turn - (!getGameState(&gs) ? 1 : 0)) % gs.nplayers]++;
 		cleanGameState(&gs);

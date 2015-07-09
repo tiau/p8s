@@ -71,7 +71,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		if(likely((bool)gtp)) {	// If we have a play to make, make it
 			makeMove(&gs, gtp);
 			gs.turn++;
-			magic = (magic ? isMagicCard(*gs.pile.top) : false);
+			gs.magic = (magic ? isMagicCard(*gs.pile.top) : false);
 		} else {
 			if(!as->gs->drew)	// If we have no play but haven't drawn, draw
 				drawCard(&gs);
@@ -90,12 +90,12 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		}
 
 		if(unlikely(!gs.players[0].n)) {
-			ret += ngames;
+			ret += MAXGAMES;
 			cleanGameState(&gs);
 			break;
 		}
 		// TODO use silly magic about win distance to select better plays?
-		ret += (gameLoop(&gs, false, e, magic, 0) > 0.0);
+		ret += (gameLoop(&gs, false, e, 0) > 0.0);
 
 		cleanGameState(&gs);
 	}

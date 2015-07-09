@@ -3,23 +3,10 @@
 #include <math.h>
 #include "io.h"
 #include "movegen.h"
+#include "probability.h"
 
 #ifndef ENGINE_H
 #define ENGINE_H
-
-double se(const double p,
-		  const size_t n1,
-		  const size_t n2)
-	__attribute__((hot,const));
-
-double z(const double p1,
-		 const double p2,
-		 const size_t n1,
-		 const size_t n2)
-	__attribute__((hot,const));
-
-double phi(double x)
-	__attribute__((hot,const));
 
 void cshuffle(card_t* const restrict cards,
 			  const size_t s,
@@ -53,12 +40,29 @@ bool playerDrawCard(struct gamestate* const gs,
 bool drawCard(struct gamestate* const restrict gs)
 	__attribute__((nonnull));
 
+bool glHandleMagic(struct gamestate* const restrict gs,
+				   const uint8_t verbose)
+	__attribute__((hot,nonnull));
+
+/* N.B. Caller must free as->pl */
+uint32_t glEvalMoves(struct aistate* const restrict as,
+					 struct gamestate* const gs,
+					 const uint8_t verbose)
+	__attribute__((hot,nonnull));
+
+void glHandleMove(const struct aistate* const restrict as,
+				  struct gamestate* const gs,
+				  const uint8_t verbose,
+				  bool* const restrict eight,
+				  uint32_t ptm)
+	__attribute__((hot,nonnull));
+
 float gameLoop(struct gamestate* const restrict gs,
 			  const uint8_t verbose,
 			  bool eight,
-			  bool magic,
 			  const size_t offset)
 	__attribute__((hot,nonnull));
+
 
 __attribute__((nonnull,hot))
 inline static void initPile(struct deck* const restrict pile)

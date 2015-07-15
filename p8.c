@@ -192,6 +192,7 @@ int main(int argc, char* argv[])
 	assert(CPP * MAXPLRS < DECKLEN);
 
 	igs.pile.n = 0;
+	igs.drew = false;
 	igs.players = calloc(MAXPLRS, sizeof(struct player));
 
 	opterr = 0;
@@ -258,7 +259,7 @@ int main(int argc, char* argv[])
 	}
 
 	if(!nplayers || ai[0] == NULL || nplayers < wp || !verifyHypoGame(&igs, wp)) {
-		fprintf(stderr, "Usage: %s -m nn[nn] [-g n] [-v] [-p cards] [-h cards] [-d cards]\nOptions:\n", 1+rindex(*argv, '/'));
+		fprintf(stderr, "Usage: %s -m nn[nn] [-g n] [-v] [-p cards] [-h cards]\nOptions:\n", 1+rindex(*argv, '/'));
 		fprintf(stderr, "\t-m Modes (e.g. -m00, -m124)\n");
 		fprintf(stderr, "\t-g Number of games to play\n");
 		fprintf(stderr, "\t-r Rotate player positions each game (hides signal from positional advantage)\n");

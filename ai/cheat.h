@@ -9,6 +9,7 @@
 #ifndef AI_CHEAT_H
 #define AI_CHEAT_H
 
+/* N.B. Caller must free gs->players */
 void initCheatGameStateHypothetical(struct gamestate* const restrict gs,
 									const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));

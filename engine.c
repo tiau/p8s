@@ -76,6 +76,7 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, u
 	gs->turn = 0;
 	gs->eightSuit = Unknown;
 	gs->magic = false;
+	gs->drew = false;
 	memcpy(gs->ai, ai, nplayers * sizeof(uint_fast32_t (*const)(const struct aistate* const restrict)));
 }
 

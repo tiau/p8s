@@ -268,15 +268,8 @@ void glHandleMove(const struct aistate* const restrict as, struct gamestate* con
 		} else {
 			if(unlikely(verbose)) printf("%sVoluntary passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 		}
-	} else {
-		if(!gs->drew) {
-			if(unlikely(verbose)) printf("%sForced drawing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-			if(unlikely(!drawCard(gs))) {
-				if(unlikely(verbose)) printf("%sCould not draw, forced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-			}
-		} else {
-			if(unlikely(verbose)) printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
-		}
+	} else if(unlikely(verbose && gs->drew)) {
+		printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 	}
 	if(unlikely(verbose)) printf("\n");
 	gs->turn++;

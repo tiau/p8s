@@ -14,37 +14,38 @@ static struct gamestate* copyGameState(struct gamestate* const restrict ret, con
 
 static float minimax(const struct gamestate* const restrict gs, const uint8_t player, size_t depth, float alpha, float beta);
 
-static float testChild(const struct aistate* const restrict as, const uint8_t player, const uint32_t which, const size_t depth, const float alpha, const float beta)
+static float testNode(const struct aistate* const restrict as, uint8_t player, const uint32_t which, size_t depth, const float alpha, const float beta)
 {
 	{	assert(as);
 		assert(as->pl);
 		assert(as->gs);
 		assert(as->gs->nplayers >= MINPLRS);
 		assert(as->gs->nplayers <= MAXPLRS);
-		assert(as->gs->players);}
+		assert(as->gs->players);
+		assert(player < as->gs->nplayers);}
 	float ret;
 	struct gamestate is;
 	bool eight;
-	uint8_t nextplayer = (player + 1) % as->gs->nplayers;
 
 	copyGameState(&is, as->gs);
 
-	if(likely(which != as->pl->n)) {
+	player++;
+	if(which != as->pl->n) {
 		glHandleMove(as, &is, 0, &eight, which);
-		if(glHandleMagic(&is, 0)) {
-			nextplayer = (player + 2) % as->gs->nplayers;
+		if(unlikely(glHandleMagic(&is, 0))) {
+			player++;
 		}
 	} else {
 		if(!is.drew) {
 			drawCard(&is);
-			nextplayer = player;
-			is.drew = true;
+			player--;
+			depth++;
 		} else {
 			is.turn++;
-			is.drew = false;
 		}
+		is.drew = !is.drew;
 	}
-	ret = minimax(&is, nextplayer, depth, alpha, beta);
+	ret = minimax(&is, player % as->gs->nplayers, depth, alpha, beta);
 	free(is.players);
 	return ret;
 }
@@ -60,7 +61,9 @@ static float minimax(const struct gamestate* const restrict gs, const uint8_t pl
 			return (i) ? -INFINITY : INFINITY;
 
 	if(!--depth) {
-		v = ((player) ? -1.0 : 1.0) * -evalPlayer(stateToPlayer(gs), gs->nplayers);
+		v = 0;
+		for(i = 0; i < gs->nplayers; i++)
+			v += (i ? 1.0 : -1.0) * evalPlayer(&gs->players[i], gs->nplayers);
 		return v;
 	}
 
@@ -68,7 +71,7 @@ static float minimax(const struct gamestate* const restrict gs, const uint8_t pl
 	if(!player) {
 		bv = -INFINITY;
 		for(i = 0; i <= as.pl->n; i++) {
-			v = testChild(&as, player, i, depth, alpha, beta);
+			v = testNode(&as, player, i, depth, alpha, beta);
 			if(v > bv) bv = v;
 			alpha = max(alpha, v);
 			if(beta <= alpha) break;
@@ -76,7 +79,7 @@ static float minimax(const struct gamestate* const restrict gs, const uint8_t pl
 	} else {
 		bv = INFINITY;
 		for(i = 0; i <= as.pl->n; i++) {
-			v = testChild(&as, player, i, depth, alpha, beta);
+			v = testNode(&as, player, i, depth, alpha, beta);
 			if(v < bv) bv = v;
 			beta = min(beta, v);
 			if(beta <= alpha) break;
@@ -93,14 +96,16 @@ uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 	uint_fast32_t ret = 0;
 
 	for(i = 0; i <= as->pl->n; i++) {
-		v = testChild(as, 0, i, 6, -INFINITY, INFINITY);
+		v = testNode(as, 0, i, 4, -INFINITY, INFINITY);
+#ifdef MONTE_VERBOSE
 		printf("%sminmax:%s\t%zu\t%.0f\t", ANSI_CYAN, ANSI_DEFAULT, i, v);
 		if(i != as->pl->n) {
 			showPlay(plistGet(as->pl, i));
-			printf("%s %s\n", ANSI_BACK, ANSI_DEFAULT);
-		} else {
-			printf("\n");
+			printf("%s %s", ANSI_BACK, ANSI_DEFAULT);
 		}
+		printf("\n");
+#endif
+		/* Plays are ordered by size; this selects the quickest way to win */
 		if(v > bv || (v >= bv && i != as->pl->n)) {
 			bv = v;
 			best = i;

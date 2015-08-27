@@ -158,7 +158,9 @@ __attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamest
 				tplayer.c[tplayer.n++] = igs->players[i].c[j];
 	}
 
-	for(i = 0; i < ngames; i++) {
+	i = ngames;
+	ngames = 0;
+	for(; ngames < i; ngames++) {
 		if(hypo)
 			initGameStateHypoMain(&gs, igs, ai, &tplayer, wp);
 		else

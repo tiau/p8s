@@ -63,7 +63,7 @@ static float minimax(const struct gamestate* const restrict gs, const uint8_t pl
 	if(!--depth) {
 		v = 0;
 		for(i = 0; i < gs->nplayers; i++)
-			v += (i ? 1.0 : -1.0) * evalPlayer(&gs->players[i], gs->nplayers);
+			v += (i ? 1.0 : -0.5) * evalPlayer(&gs->players[i], gs->nplayers);
 		return v;
 	}
 
@@ -96,7 +96,7 @@ uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 	uint_fast32_t ret = 0;
 
 	for(i = 0; i <= as->pl->n; i++) {
-		v = testNode(as, 0, i, 4, -INFINITY, INFINITY);
+		v = testNode(as, 0, i, MMDEPTH, -INFINITY, INFINITY);
 #ifdef MONTE_VERBOSE
 		printf("%sminmax:%s\t%zu\t%.0f\t", ANSI_CYAN, ANSI_DEFAULT, i, v);
 		if(i != as->pl->n) {

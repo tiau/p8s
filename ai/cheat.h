@@ -15,6 +15,6 @@ void initCheatGameStateHypothetical(struct gamestate* const restrict gs,
 	__attribute__((hot,nonnull));
 
 uint_fast32_t aiCheat(const struct aistate* const restrict as)
-	__attribute__((hot,pure,nonnull));
+	__attribute__((hot,nonnull));
 
 #endif /* AI_CHEAT_H */

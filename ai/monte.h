@@ -63,6 +63,6 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as,
 	__attribute__((hot,nonnull));
 
 uint_fast32_t aiMonte(const struct aistate* const restrict as)
-	__attribute__((hot,pure,nonnull));
+	__attribute__((hot,nonnull));
 
 #endif /* AI_MONTE_H */

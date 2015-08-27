@@ -20,5 +20,5 @@ uint_fast32_t aiCheat(const struct aistate* const restrict as)
 	 * so as not to just plays the same game over and over.  Using aiRandom
 	 * also allows it to more thoroughly explore its vastly constricted state
 	 * space. */
-	return pctmRun(as, initCheatGameStateHypothetical, aiRandom);
+	return pctmRun(as, initCheatGameStateHypothetical, aiRandom, __func__);
 }

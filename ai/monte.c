@@ -189,7 +189,7 @@ static void sendPlay(const struct pctmstate* const restrict s, const size_t play
 	mq_send(*s->mq, buf, 18, 1);
 }
 
-__attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* const restrict s, const size_t ncpu)
+__attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* const restrict s, const size_t ncpu, const char* const restrict name)
 {
 	size_t i, j, k, m;
 	const struct play* restrict play;
@@ -252,7 +252,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				dead[j] = true;
 				act--;
 #ifdef MONTE_VERBOSE
-				printf("%smonte:%s  %zu\t(%.1f%%\t%.1f%%)\t%.1f%%\t", ANSI_CYAN, ANSI_DEFAULT, j, 100*phiv, 100.0*((float)tt) / (float)MAXGAMES, 100.0*scores[j]);
+				printf("%s%s:%s  %zu\t(%.1f%%\t%.1f%%)\t%.1f%%\t", ANSI_CYAN, name, ANSI_DEFAULT, j, 100*phiv, 100.0*((float)tt) / (float)MAXGAMES, 100.0*scores[j]);
 				if(j+1 == nump)
 					printf("(%s)  ", ((s->as->gs->drew) ? "pass" : "draw"));
 				else
@@ -383,13 +383,14 @@ static uint_fast32_t findBest(const struct pctmstate* const restrict s)
 	return ret;
 }
 
-uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict), uint_fast32_t (*aif)(const struct aistate* const restrict))
+uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict), uint_fast32_t (*aif)(const struct aistate* const restrict), const char* const restrict name)
 {
 	{	assert(as);
 		assert(as->gs);
 		assert(as->pl);
 		assert(as->pl->n);
-		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
+		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);
+		assert(name);}
 
 	/* How many moves we have counting 8-ending plays as 4-in-1 and draw/pass
 	 * as a move.  emap / initMoveMap() allow us to map from one number to the
@@ -411,7 +412,7 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 	initMoveMap(emap, as->pl);
 	struct pctmstate pcs = { as, nump, trials, wins, emap, &mq, &rwl, aif, initgs };
 	launchThreads(threads, ncpu, monteThread, &pcs);
-	controlThread(&pcs, ncpu);
+	controlThread(&pcs, ncpu, name);
 	threadsDone(ncpu, threads, &mq, mqname);
 	pthread_rwlock_destroy(&rwl);
 	return findBest(&pcs);
@@ -419,5 +420,5 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 
 uint_fast32_t aiMonte(const struct aistate* const restrict as)
 {
-	return pctmRun(as, initGameStateHypothetical, MONTEAIF);
+	return pctmRun(as, initGameStateHypothetical, MONTEAIF, __func__);
 }

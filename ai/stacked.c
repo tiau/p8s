@@ -49,5 +49,5 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const
 
 uint_fast32_t aiStacked(const struct aistate* const restrict as)
 {
-	return pctmRun(as, initStackedGameStateHypothetical, STACKEDAIF);
+	return pctmRun(as, initStackedGameStateHypothetical, STACKEDAIF, __func__);
 }

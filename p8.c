@@ -281,6 +281,7 @@ int main(int argc, char* argv[])
 #endif
 
 	signal(SIGINT, sigintQueueClean);
+	signal(SIGUSR1, (void(*)(int))showStats);
 #ifndef NDEBUG
 	signal(SIGABRT, sigintQueueClean);
 #endif

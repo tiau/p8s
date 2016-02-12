@@ -72,8 +72,7 @@ __attribute__((nonnull,hot)) static void recurserator(const size_t d, const size
 			struct play play;
 			play.n = 1;
 			play.c[0] = player->c[is[1]];
-			if(isCardOneLegal(gs, &play))
-				plistAdd(pl, &play);
+			addLegals(gs, &play, pl, mt);
 		} else {
 			permutator(k, gs, player, pl, is, mt);
 		}

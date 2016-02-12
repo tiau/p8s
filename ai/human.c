@@ -64,11 +64,11 @@ uint_fast32_t human(const struct aistate* const restrict as)
 		MPACK(ret, as->pl->n);
 		if(*b == 'd')
 			return ret;
-		if(*b == 'h')
+		else if(*b == 'h')
 			tm = aiStacked(as);
-		if(*b == 'H')
+		else if(*b == 'H')
 			tm = aiCheat(as);
-		if(*b == '?')
+		else if(*b == '?')
 			tm = aiMonte(as);
 		if(*b == 'h' || *b == 'H' || *b == '?') {
 			tm = MUPACK(tm);

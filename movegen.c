@@ -30,25 +30,32 @@ __attribute__((nonnull,hot)) static void addLegals(const struct gamestate* const
 	}
 }
 
+__attribute__((nonnull,hot)) static void permuteGuts(const struct gamestate* const restrict gs, const struct player* const restrict player, struct plist* restrict pl, struct mTable* const restrict mt, struct play* const restrict play)
+{
+	size_t i;
+	ssize_t j;
+
+	qsort(play->c, play->n, sizeof(card_t), cmpcardt);
+	addLegals(gs, play, pl, mt);
+	while((j = permuteIndex(play)) != -1) {
+		for(i = play->n - 1; i < play->n && play->c[i] < play->c[j]; i--);
+		cardSwap(&play->c[j], &play->c[i]);
+		cardsRev(play->c, j + 1, play->n - 1);
+		addLegals(gs, play, pl, mt);
+	}
+}
+
 __attribute__((nonnull,hot)) static void permutator(const size_t k, const struct gamestate* const restrict gs, const struct player* const restrict player, struct plist* restrict pl, ssize_t* restrict is, struct mTable* const restrict mt)
 {
 	struct play play;
 	size_t i;
-	ssize_t j;
 
 	play.n = k;
 	for(i = 0; i < k; i++)
 		play.c[i] = player->c[is[i+1]];
 
 	if(isPlayLegal(&play)) {
-		qsort(play.c, play.n, sizeof(card_t), cmpcardt);
-		addLegals(gs, &play, pl, mt);
-		while((j = permuteIndex(&play)) != -1) {
-			for(i = play.n - 1; i < play.n && play.c[i] < play.c[j]; i--);
-			cardSwap(&play.c[j], &play.c[i]);
-			cardsRev(play.c, j + 1, play.n - 1);
-			addLegals(gs, &play, pl, mt);
-		}
+		permuteGuts(gs, player, pl, mt, &play);
 	}
 }
 

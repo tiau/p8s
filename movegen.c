@@ -34,13 +34,28 @@ __attribute__((nonnull,hot)) static void permutator(const size_t k, const struct
 {
 	struct play play;
 	size_t i;
-	ssize_t j;
 
 	play.n = k;
 	for(i = 0; i < k; i++)
 		play.c[i] = player->c[is[i+1]];
 
 	if(isPlayLegal(&play)) {
+		ssize_t j;
+		bool any = false;
+		card_t vv;
+		const suit_t cs = (gs->eightSuit == Unknown) ? getSuit(*gs->pile.top) : gs->eightSuit;
+		const card_t tv = getVal(*gs->pile.top);
+
+		for(i = 0; i < play.n; i++) {
+			vv = getVal(play.c[i]);
+			if((getSuit(play.c[i]) == cs) || (vv == tv) || (vv == 8)) {
+				any = true;
+				break;
+			}
+		}
+		if(!any)
+			return;
+
 		qsort(play.c, play.n, sizeof(card_t), cmpcardt);
 		addLegals(gs, &play, pl, mt);
 		while((j = permuteIndex(&play)) != -1) {

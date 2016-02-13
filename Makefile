@@ -45,7 +45,7 @@ includegraph: ${FAI}
 
 profile: ${FAI}
 	${cc} -fprofile-generate ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -o p8
-	./p8 -m67 >/dev/null
+	./p8 -m68 >/dev/null
 	${cc} ${PFLAGS} ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -s -o p8
 	@make clean
 

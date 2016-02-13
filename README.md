@@ -187,8 +187,12 @@ On the other hand, we can't really decide between certain straight variants and 
 
 
 ### Notes
-<a name="note1">1</a>: Except under the extremely unlikely circumstance where the deck is out of cards and there's only one card in the pile. Then they must pass if they do not wish to make a move.
-<a name="note2">2</a>: AIs that will report move info given **make loud**: 6 (monte carlo), 7 (stacked monte carlo), 8 (cheats), 9 (minimax cheats). **make louder** can be used to get move info from AIs 4 (judges) and 5 (judges/draws). This will cause the higher AIs to output **a lot** of (mixed up, due to threading) info.
-<a name="note3">3</a>: **0** or **X** represents a 10 for the -h and -p command-line options.
-<a name="note4">4</a>: Human AI commands: **d** draw/pass, **#** make play number. **?** to invoke monte carlo AI, **h** to invoke stacked monte carlo AI, **H** to invoke cheat monte carlo AI. **Q** to quit.
-<a name="note5">5</a>: Note that given how far into the search window the numbers are reported at their accuracy will vary wildly. Some moves we ruled out very quickly, but we didn't play enough hypothetical games with them to get an accurate picture of how bad they were. We know they were almost certainly worse than the best move at the time, but that is all.
+- <a name="note1">1</a>: Except under the extremely unlikely circumstance where the deck is out of cards and there's only one card in the pile. Then they must pass if they do not wish to make a move.
+
+- <a name="note2">2</a>: AIs that will report move info given **make loud**: 6 (monte carlo), 7 (stacked monte carlo), 8 (cheats), 9 (minimax cheats). **make louder** can be used to get move info from AIs 4 (judges) and 5 (judges/draws). This will cause the higher AIs to output **a lot** of (mixed up, due to threading) info.
+
+- <a name="note3">3</a>: **0** or **X** represents a 10 for the -h and -p command-line options.
+
+- <a name="note4">4</a>: Human AI commands: **d** draw/pass, **#** make play number. **?** to invoke monte carlo AI, **h** to invoke stacked monte carlo AI, **H** to invoke cheat monte carlo AI. **Q** to quit.
+
+- <a name="note5">5</a>: Note that given how far into the search window the numbers are reported at their accuracy will vary wildly. Some moves we ruled out very quickly, but we didn't play enough hypothetical games with them to get an accurate picture of how bad they were. We know they were almost certainly worse than the best move at the time, but that is all.

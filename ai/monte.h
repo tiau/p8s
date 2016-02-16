@@ -34,6 +34,9 @@
 /* Maximum number of hypothetical games to play for a each possible move */
 #define MAXGAMES 9999
 
+/* Minimum number of games to play with each move before ruling it out */
+#define MINGAMES 25
+
 /* Extra state for producer-consumer thread model */
 struct pctmstate {
 	const struct aistate* const as;

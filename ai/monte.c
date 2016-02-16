@@ -245,7 +245,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				continue;
 			tt = s->trials[j];
 			ath = min(tt, btn);
-			if(ath < 10)
+			if(ath < MINGAMES)
 				continue;
 			phiv = phi(z(s->wins[j], bwins, tt, btn));
 			if(phiv < PIBM || tt > MAXGAMES || act == 1) {

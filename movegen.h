@@ -15,7 +15,7 @@ bool isPlayLegal(const struct play* const restrict play)
 	__attribute__((hot,pure,nonnull));
 
 
-__attribute__((hot,pure,nonnull))
+__attribute__((hot,pure,nonnull,used))
 static int cmpcardt(const void* const c1, const void* const c2)
 {
 	{	assert(c1);

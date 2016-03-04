@@ -33,15 +33,13 @@ __attribute__((hot,nonnull,pure)) static bool isStraightish(const struct play* c
 			cmin = t;
 	}
 
-	const bool *bp = (cmin == 1 && seen[13]) ? &seen[9] : &seen[cmin];
-	if(!*++bp) return false;
-	if(!*++bp) return false;
-	if(play->n > 3) {
-		if(!*++bp) return false;
-		if(play->n > 4)
-			if(!*++bp) return false;
+	uint_fast8_t offset = (cmin == 1 && (seen[10] || seen[11] || seen[12] || seen[13])) ? 9 : cmin;
+	uint_fast8_t look;
+	for(i = 0, t = 0; i < MAXCIP; i++) {
+		look = unlikely(look > 13) ? 1 : offset + i;
+		t += seen[look];
 	}
-	return true;
+	return play->n == t;
 }
 
 __attribute__((nonnull,hot,pure)) static bool isLegalish(const struct gamestate* const restrict gs, const struct play* const restrict play)
@@ -64,8 +62,8 @@ __attribute__((nonnull,hot,pure)) static bool isLegalish(const struct gamestate*
 			d2 = getVal(play->c[0]) - getVal(play->c[2]);
 			d1 = getVal(play->c[0]) - getVal(play->c[1]);
 			if(play->n == 3)
-				return !d1 || !d2 || oneSuit(play) || isStraightish(play);
-			return (!d1 && !d2) || (!d1 && !d3) || (!d2 && !d3) || oneSuit(play) || isStraightish(play);
+				return !d1 || !d2 || (d1 == d2) || oneSuit(play) || isStraightish(play);
+			return isTwoPair(play) || (!d1 && !d2) || (!d1 && !d3) || (!d2 && !d3) || (d1 == d2 && d2 == d3) || oneSuit(play) || isStraightish(play);
 		case 5:
 			/* 5 card plays are immediately checked by isMoveLegal() */
 			return true;

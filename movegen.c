@@ -33,11 +33,11 @@ __attribute__((hot,nonnull,pure)) static bool isStraightish(const struct play* c
 			cmin = t;
 	}
 
-	uint_fast8_t offset = (cmin == 1 && (seen[10] || seen[11] || seen[12] || seen[13])) ? 9 : cmin;
-	uint_fast8_t look;
+	uint_fast8_t offset = (cmin == 1 && (seen[10] || seen[11] || seen[12] || seen[13])) ? 10 : cmin;
 	for(i = 0, t = 0; i < MAXCIP; i++) {
-		look = unlikely(look > 13) ? 1 : offset + i;
-		t += seen[look];
+		t += seen[offset];
+		if(++offset > 13)
+			offset = 1;
 	}
 	return play->n == t;
 }

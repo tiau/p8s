@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <mqueue.h>
+#include <sys/time.h>
 #include "draw.h"
 
 /* The Monte (Carlo) AI runs a whole bunch of games for each possible play it

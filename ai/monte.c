@@ -411,9 +411,20 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 	initMsgQueue(&mq, mqname, ncpu);
 	initMoveMap(emap, as->pl);
 	struct pctmstate pcs = { as, nump, trials, wins, emap, &mq, &rwl, aif, initgs };
+#ifdef BENCHMARK
+	struct timeval tval_before, tval_after, tval_result;
+	gettimeofday(&tval_before, NULL);
+#endif
 	launchThreads(threads, ncpu, monteThread, &pcs);
 	controlThread(&pcs, ncpu, name);
 	threadsDone(ncpu, threads, &mq, mqname);
+#ifdef BENCHMARK
+	gettimeofday(&tval_after, NULL);
+	timersub(&tval_after, &tval_before, &tval_result);
+	size_t s = 0;
+	for(size_t i = 0; i < nump; i++) s += trials[i]; 
+	printf("%zu games in %ld.%06ld seconds, %f games/sec\n", s, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, (float)s/((float)tval_result.tv_sec+(float)tval_result.tv_usec/1000000));
+#endif
 	pthread_rwlock_destroy(&rwl);
 	return findBest(&pcs);
 }

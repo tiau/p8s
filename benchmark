@@ -1,22 +1,12 @@
 #!/bin/bash
 
-gs=600
-nt=60
+gs=10
 
-echo "Benchmarking..."
+make benchmark
 
-x=""
-for i in `seq $nt` ; do
-	n="$(./time ./p8 -m3453 -g$gs 2>&1 | grep user | sed 's/^.*\ *0m\([0-9\.]*\)s$/\1/')"
-	x="$x $n"
+echo "Benchmarking $gs rounds..."
+for i in `seq $gs` ; do
+	score[$i]="$(mean `./p8 -p "9H 7H 7S QS AS 4S" -h "9C 7C 6C 4C KC KH 3H" -h "8H 8C 3C KS" -m66 | awk '{ print $6 }' | xargs` | sed 's/\..*//')"
+	echo -n "$i "
 done
-
-s="$(stats $x)"
-sd="$(echo "$s" | grep "^StdDev:" | awk '{ print $2 }')"
-mean="$(echo "$s" | grep "^Mean:" | awk '{ print $2 }')"
-n="$(echo "$s" | grep "^n:" | awk '{ print $2 }')"
-sum="$(echo "$s" | grep "^Sum:" | awk '{ print $2 }')"
-gps="$(echo "scale=2;($n*$gs)/$sum" | bc)"
-echo
-echo "$s" | grep -v Slope | grep -v Skewness | grep -v Median | grep -v Mode
-echo "$gps games per second"
+echo -e "\nFinal score: `mean ${score[*]} | sed 's/\..*//'`"

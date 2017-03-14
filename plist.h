@@ -4,7 +4,7 @@
 #define PLIST_H
 
 /* Number of elements to store in each node */
-#define PLNODESIZE 50
+#define PLNODESIZE 100
 
 struct plist {
 	size_t sz;	// Number of elements in this bucket

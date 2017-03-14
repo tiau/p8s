@@ -29,13 +29,13 @@
 
 /* The probability that apparently worse move W is actually better than best
  * apparent move B at which we cut off W from further computation */
-#define PIBM 0.01
+#define PIBM 0.0001
 
 /* Maximum number of hypothetical games to play for a each possible move */
-#define MAXGAMES 9999
+#define MAXGAMES 19999
 
 /* Minimum number of games to play with each move before ruling it out */
-#define MINGAMES 25
+#define MINGAMES 50
 
 /* Extra state for producer-consumer thread model */
 struct pctmstate {

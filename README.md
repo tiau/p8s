@@ -169,8 +169,8 @@ aiMonte: 17	(6.4%	105.3%)	52.6%	JC, 10H, QS, KS, AH
 aiMonte: 13	(50.0%	93.6%)	52.9%	JC, 10H, QS, KS, AD
 AI recommends	1 :: JC
 ```
-
-Here we see what the program output looks like if **make loud** is used to compile it.<sup>[2](#note2)</sup> We use the human 'AI' to give us control of the first player. We also specify what our hand will be and what cards should be in the pile.<sup>[3](#note3)</sup> The non-specified cards (our opponent's hand and the deck) are randomly assigned from the remaining cards. Instead of choosing our own move, we ask the AI to analyze our hand and suggest a move by passing '?' rather than a move number.<sup>[4](#note4)</sup>
+<a name='Rnote1'>[1](#note1)</a>
+Here we see what the program output looks like if **make loud** is used to compile it.<sup><a name='Rnote2'>[2](#note2)</a></sup> We use the human 'AI' to give us control of the first player. We also specify what our hand will be and what cards should be in the pile.<sup><a name='Rnote3'>[3](#note3)</a></sup> The non-specified cards (our opponent's hand and the deck) are randomly assigned from the remaining cards. Instead of choosing our own move, we ask the AI to analyze our hand and suggest a move by passing '?' rather than a move number.<sup><a name='Rnote4'>[4](#note4)</a></sup>
 
 The information that the Monte Carlo AI is reporting is as follows:
 - Name of the AI: aiMonte
@@ -179,7 +179,7 @@ The information that the Monte Carlo AI is reporting is as follows:
 - Percent search window exhausted: e.g. 105.3%
 - Percent of games won given move: e.g. 53.1%
 
-So what can we tell from all this? Tons! For example, we quickly ruled out throwing both Jacks. Doing so would leave us unable to play our straight. Throwing our 8 this early doesn't seem like a good idea either.<sup>[5](#note5)</sup>
+So what can we tell from all this? Tons! For example, we quickly ruled out throwing both Jacks. Doing so would leave us unable to play our straight. Throwing our 8 this early doesn't seem like a good idea either.<sup><a name='Rnote5'>[5](#note5)</a></sup>
 
 On the other hand, we can't really decide between certain straight variants and throwing one jack (preserving our straight). This is especially stark as running the AI multiple times confirms that it will fluctuate wildly between recommended moves. However all of the moves that make it to the end of the search window are likely very good and it's entirely possible there is not enough signal to distinguish them even with further Monte Carlo probing.
 
@@ -189,10 +189,10 @@ On the other hand, we can't really decide between certain straight variants and 
 ### Notes
 <a name="note1">[1](#Rnote1)</a>: Except under the extremely unlikely circumstance where the deck is out of cards and there's only one card in the pile. Then they must pass if they do not wish to make a move.
 
-<a name="note2">2</a>: AIs that will report move info given **make loud**: 6 (monte carlo), 7 (stacked monte carlo), 8 (cheats), 9 (minimax cheats). **make louder** can be used to get move info from AIs 4 (judges) and 5 (judges/draws). This will cause the higher AIs to output **a lot** of (mixed up, due to threading) info.
+<a name="note2">[2](#Rnote2)</a>: AIs that will report move info given **make loud**: 6 (monte carlo), 7 (stacked monte carlo), 8 (cheats), 9 (minimax cheats). **make louder** can be used to get move info from AIs 4 (judges) and 5 (judges/draws). This will cause the higher AIs to output **a lot** of (mixed up, due to threading) info.
 
-<a name="note3">3</a>: **0** or **X** represents a 10 for the -h and -p command-line options.
+<a name="note3">[3](#Rnote3)</a>: **0** or **X** represents a 10 for the -h and -p command-line options.
 
-<a name="note4">4</a>: Human AI commands: **d** draw/pass, **#** make play number. **?** to invoke monte carlo AI, **h** to invoke stacked monte carlo AI, **H** to invoke cheat monte carlo AI. **Q** to quit.
+<a name="note4">[4](#Rnote4)</a>: Human AI commands: **d** draw/pass, **#** make play number. **?** to invoke monte carlo AI, **h** to invoke stacked monte carlo AI, **H** to invoke cheat monte carlo AI. **Q** to quit.
 
-<a name="note5">5</a>: Note that given how far into the search window the numbers are reported at their accuracy will vary wildly. Some moves we ruled out very quickly, but we didn't play enough hypothetical games with them to get an accurate picture of how bad they were. We know they were almost certainly worse than the best move at the time, but that is all.
+<a name="note5">[5](#Rnote5)</a>: Note that given how far into the search window the numbers are reported at their accuracy will vary wildly. Some moves we ruled out very quickly, but we didn't play enough hypothetical games with them to get an accurate picture of how bad they were. We know they were almost certainly worse than the best move at the time, but that is all.

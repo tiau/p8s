@@ -422,7 +422,7 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 	gettimeofday(&tval_after, NULL);
 	timersub(&tval_after, &tval_before, &tval_result);
 	size_t s = 0;
-	for(size_t i = 0; i < nump; i++) s += trials[i]; 
+	for(size_t i = 0; i < nump; i++) s += trials[i];
 	printf("%zu games in %ld.%06ld seconds, %f games/sec\n", s, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, (float)s/((float)tval_result.tv_sec+(float)tval_result.tv_usec/1000000));
 #endif
 	pthread_rwlock_destroy(&rwl);

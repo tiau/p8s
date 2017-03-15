@@ -26,7 +26,7 @@ debug: ${FAI}
 warn: ${FAI}
 	${cc} -DMONTE_VERBOSE ${WFLAGS} ${WEXTRA} ${CFLAGS} ${RFLAGS} ${DFLAGS} ${FAI} ${SFLAGS} -o p8
 
-benchmark: ${FAI}
+bench: ${FAI}
 	@CFLAGS="${CFLAGS} ${RFLAGS} -DBENCHMARK" make release
 
 loud: ${FAI}

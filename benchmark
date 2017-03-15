@@ -2,11 +2,8 @@
 
 gs=10
 
-make benchmark
-
-echo "Benchmarking $gs rounds..."
-for i in `seq $gs` ; do
-	score[$i]="$(mean `./p8 -p "9H 7H 7S QS AS 4S" -h "9C 7C 6C 4C KC KH 3H" -h "8H 8C 3C KS" -m66 | awk '{ print $6 }' | xargs` | sed 's/\..*//')"
-	echo -n "$i "
-done
-echo -e "\nFinal score: `mean ${score[*]} | sed 's/\..*//'`"
+make bench
+echo -e "\nFew plays :::::::::::::::::::::::::::::::::::::::::::::::::"
+time ./p8 -p "9H 7H 7S QS AS 4S" -h "9C 7C 6C 4C KC KH 3H" -h "8H 8C 3C KS" -m66 -g2 | grep games.sec | sed 's/.*\ \([0-9]*\)\.[0-9]*\(\ games.*\)/\1\2/'
+echo -e "\nMany plays ::::::::::::::::::::::::::::::::::::::::::::::::"
+time ./p8 -h "0H 0D 9H 9D 8H 8D 7H 7D 6H 6D" -h "0C 0S 9C 9S 8C 8S 7C 7S 6C 6S" -m66 -g2 | grep games.sec | sed 's/.*\ \([0-9]*\)\.[0-9]*\(\ games.*\)/\1\2/'

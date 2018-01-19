@@ -39,6 +39,7 @@ void initGameStateHypoShared(struct gamestate* const restrict gs, const struct g
 	gs->eightSuit = ogs->eightSuit;
 	gs->drew = ogs->drew;
 	gs->magic = false;
+	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(uint_fast64_t));
 }
 
 __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)

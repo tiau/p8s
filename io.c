@@ -111,6 +111,20 @@ void showGameState(const struct gamestate* const restrict gs, const size_t offse
 	printf(", %sTurn %s%zu%s (player %s%zu%s)\n", ANSI_DEFAULT, ANSI_WHITE, gs->turn, ANSI_DEFAULT, ANSI_WHITE, (gs->turn + offset - (!getGameState(gs) ? 1 : 0)) % gs->nplayers, ANSI_DEFAULT);
 }
 
+void showDrawMap(const struct gamestate* const restrict gs)
+{
+	size_t i, j;
+
+	assert(gs);
+
+	for(i = 0; i < gs->nplayers; i++) {
+		printf("Player %zu draws per turn: ", i);
+		for(j = 0; j < 32; j++)
+			printf("%zu ", (gs->draws[i] >> j*2) & 3);
+		printf("\n");
+	}
+}
+
 int getGameState(const struct gamestate* const restrict gs)
 {
 	assert(gs);

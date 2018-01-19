@@ -140,6 +140,7 @@ __attribute__((hot,nonnull)) static void initGameStateHypoMain(struct gamestate*
 					assert(false);
 		}
 	}
+	memset(gs->draws, 0, nplayers * sizeof(uint_fast64_t));
 }
 
 __attribute__((hot,nonnull)) static void runGames(const bool hypo, struct gamestate* const restrict igs, const size_t wp, const bool rot, const uint8_t verbose, uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict))

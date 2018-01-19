@@ -78,6 +78,7 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, u
 	gs->magic = false;
 	gs->drew = false;
 	memcpy(gs->ai, ai, nplayers * sizeof(uint_fast32_t (*const)(const struct aistate* const restrict)));
+	memset(gs->draws, 0, nplayers * sizeof(uint_fast64_t));
 }
 
 void cleanGameState(struct gamestate* const restrict gs)
@@ -146,6 +147,7 @@ bool playerDrawCard(struct gamestate* const gs, struct player* const player)
 
 	player->c[player->n++] = *gs->deck.top++;
 	gs->deck.n--;
+	gs->draws[player - gs->players] += 1;
 	return true;
 }
 
@@ -206,7 +208,6 @@ bool glHandleMagic(struct gamestate* const restrict gs, const uint8_t verbose)
 			}
 		} else if(tc == 3) {
 			if(unlikely(verbose)) printf("%s3 played, skipping turn%s\n\n", ANSI_BLUE, ANSI_DEFAULT);
-			gs->turn++;
 			return true;
 		}
 	}
@@ -272,7 +273,6 @@ void glHandleMove(const struct aistate* const restrict as, struct gamestate* con
 		printf("%sForced passing%s\n", ANSI_BLUE, ANSI_DEFAULT);
 	}
 	if(unlikely(verbose)) printf("\n");
-	gs->turn++;
 	gs->drew = false;
 }
 
@@ -287,11 +287,13 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 	while(getGameState(gs)) {
 		if(likely(!eight)) gs->eightSuit = Unknown;
 		glShowStatus(gs, verbose, offset);
-		if(glHandleMagic(gs, verbose))
-			continue;
-		ptm = glEvalMoves(&as, gs, verbose);
-		glHandleMove(&as, gs, verbose, &eight, ptm);
-		plistDel(as.pl);
+		if(!glHandleMagic(gs, verbose)) {
+			ptm = glEvalMoves(&as, gs, verbose);
+			glHandleMove(&as, gs, verbose, &eight, ptm);
+			plistDel(as.pl);
+		}
+		gs->draws[gs->turn % gs->nplayers] <<= 2;
+		gs->turn++;
 	}
 	return (((gs->turn - 1) % gs->nplayers) ? -1.0 * gs->turn : gs->turn);
 }

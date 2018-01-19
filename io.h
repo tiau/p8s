@@ -41,6 +41,9 @@ void showGameState(const struct gamestate* const restrict gs,
 				   const size_t offset)
 	__attribute__((nonnull,cold));
 
+void showDrawMap(const struct gamestate* const restrict gs)
+	__attribute__((nonnull,cold));
+
 int getGameState(const struct gamestate* const restrict gs)
 	__attribute__((nonnull,pure));
 

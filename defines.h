@@ -77,6 +77,8 @@ struct gamestate {
 	suit_t eightSuit;	// Suit to go on top of 8s, if magic
 	/* AI to invoke for each player slot */
 	uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict);
+	/* A bitmap of recent drawing events, 2 bits per turn */
+	uint_fast64_t draws[MAXPLRS];
 };
 
 

@@ -88,6 +88,7 @@ void cleanGameState(struct gamestate* const restrict gs)
 	gs->pile.top = gs->pile.c;
 	gs->deck.n = 0;
 	gs->pile.n = 0;
+	memset(gs->draws, 0, gs->nplayers * sizeof(uint_fast64_t));
 }
 
 __attribute__((nonnull,hot)) static void removeCard(struct player* const restrict player, const card_t c)

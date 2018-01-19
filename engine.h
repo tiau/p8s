@@ -17,6 +17,7 @@ void populateCIH(const struct gamestate* const restrict gs,
 				 size_t* const restrict cih)
 	__attribute__((hot,nonnull));
 
+/* N.B. Caller must cleanGameState() */
 void initGameState(struct gamestate* const restrict gs,
 				   const size_t nplayers,
 				   uint_fast32_t (* const ai[MAXPLRS])(const struct aistate* const restrict))

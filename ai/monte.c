@@ -194,7 +194,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 	size_t i, j, k, m;
 	const struct play* restrict play;
 	const size_t nump = s->nplays;
-	size_t hmg = 20;	// How many games to play the first round
+	size_t hmg = MINGAMES;
 	bool dead[nump];
 	float scores[nump];
 	float best, ath;
@@ -222,7 +222,6 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				sendPlay(s, i, m, Unknown, hmg, dead);
 			}
 			hmg += hmg / 8;
-			usleep(4000);
 		}
 
 		size_t bwins = 0;
@@ -304,7 +303,7 @@ __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 			 * aaaa 4 bytes, which play to make
 			 * bbbb 4 bytes, which bucket to use
 			 * c	1 bytes, the suit for 8-ending plays
-			 * cccc 4 bytes, how many games to play
+			 * dddd 4 bytes, how many games to play
 			 * 0	1 null byte */
 				wp = atoi(tbuf+1);
 				bucket = atoi(tbuf+6);
@@ -353,7 +352,7 @@ static void threadsDone(const size_t nthr, pthread_t* const restrict threads, mq
 		fprintf(stderr, "%s: Failed to unlink message queue\n", __func__);
 }
 
-static uint_fast32_t findBest(const struct pctmstate* const restrict s)
+__attribute__((pure)) static uint_fast32_t findBest(const struct pctmstate* const restrict s)
 {
 	size_t i, m;
 	uint_fast32_t ret = 0;
@@ -396,7 +395,7 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 	 * as a move.  emap / initMoveMap() allow us to map from one number to the
 	 * play number and eight suit that we are expected to return. */
 	const size_t nump = eightMoveCount(as->pl);
-	const size_t ncpu = sysconf(_SC_NPROCESSORS_ONLN) + 1;
+	const size_t ncpu = sysconf(_SC_NPROCESSORS_ONLN) / 2; // Assume 2 threads per core
 	size_t emap[nump];
 	size_t wins[nump];
 	size_t trials[nump];

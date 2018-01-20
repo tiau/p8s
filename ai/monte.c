@@ -39,7 +39,7 @@ void initGameStateHypoShared(struct gamestate* const restrict gs, const struct g
 	gs->eightSuit = ogs->eightSuit;
 	gs->drew = ogs->drew;
 	gs->magic = false;
-	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(uint_fast64_t));
+	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(uint_fast16_t));
 }
 
 __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
@@ -91,7 +91,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		}
 
 		if(unlikely(!gs.players[0].n)) {
-			ret += MAXGAMES;
+			ret = MAXGAMES;
 			cleanGameState(&gs);
 			break;
 		}
@@ -176,14 +176,7 @@ static void sendPlay(const struct pctmstate* const restrict s, const size_t play
 	assert(s);
 	assert(dead);
 
-#if HAPPYHELGRIND
 	if(dead[rplay])
-#else
-	/* We don't lock for trials here since it's not really important if we get
-	 * a lower-than-actual number; we'd waste more time locking and the worst
-	 * outcome is that we play a few more games than we needed to. */
-	if(dead[rplay] || s->trials[rplay] >= MAXGAMES)
-#endif
 		return;
 
 	snprintf(buf, BUFSZ, "p%4zu %4zu %1u %4zu", play, rplay, suit, hmg);
@@ -313,6 +306,7 @@ __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 				ti = ngames;
 				gtp = unlikely(wp == s->as->pl->n) ? NULL : plistGet(s->as->pl, wp);
 				tt = playHypoGames(ngames, gtp, forces, s->as, s->aif, s->initgs);
+				ti = max(ti, tt);
 				pthread_rwlock_wrlock(s->rwl);
 				s->wins[bucket] += tt;
 				s->trials[bucket] += ti;

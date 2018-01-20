@@ -17,11 +17,6 @@
 #ifndef AI_MONTE_H
 #define AI_MONTE_H
 
-/* Changing this to true will prevent helgrind (drd doesn't seem to care) from
- * complaining about sendPlay() and monteThread() having data races.  They do,
- * but not in a way that matters. */
-#define HAPPYHELGRIND false
-
 /* Number of bytes sent per pipe message */
 #define BUFSZ 18
 

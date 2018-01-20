@@ -50,7 +50,6 @@ void dealStateSans(struct gamestate* const restrict gs,
 				   const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));
 
-/* N.B. Caller must free gs->players */
 void initGameStateHypoShared(struct gamestate* const restrict gs,
 							 const struct gamestate* const restrict ogs)
 	__attribute__((hot,nonnull));

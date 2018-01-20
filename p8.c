@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 
 	igs.pile.n = 0;
 	igs.drew = false;
-	igs.players = calloc(MAXPLRS, sizeof(struct player));
+	memset(igs.players, 0, MAXPLRS * sizeof(struct player));
 	memset(igs.draws, 0, MAXPLRS * sizeof(uint_fast64_t));
 
 	opterr = 0;
@@ -290,7 +290,6 @@ int main(int argc, char* argv[])
 	successes = calloc(nplayers, sizeof(size_t));
 	runGames(hypo, &igs, wp, rot, verbose, ai);
 	free(successes);
-	free(igs.players);
 
 	return SUCCESS;
 }

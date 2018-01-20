@@ -1,6 +1,5 @@
 #include "mmcheat.h"
 
-/* N.B. Caller must free ret->players */
 static struct gamestate* copyGameState(struct gamestate* const restrict ret, const struct gamestate* const restrict gs)
 {
 	{	assert(ret);
@@ -21,7 +20,6 @@ static float testNode(const struct aistate* const restrict as, uint8_t player, c
 		assert(as->gs);
 		assert(as->gs->nplayers >= MINPLRS);
 		assert(as->gs->nplayers <= MAXPLRS);
-		assert(as->gs->players);
 		assert(player < as->gs->nplayers);}
 	float ret;
 	struct gamestate is;
@@ -46,7 +44,6 @@ static float testNode(const struct aistate* const restrict as, uint8_t player, c
 		is.drew = !is.drew;
 	}
 	ret = minimax(&is, player % as->gs->nplayers, depth, alpha, beta);
-	free(is.players);
 	return ret;
 }
 

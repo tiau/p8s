@@ -49,8 +49,7 @@ __attribute__((nonnull,hot)) inline static void deal(struct gamestate* const res
 {
 	size_t i, p;
 
-	{	assert(gs);
-		assert(gs->players);}
+	assert(gs);
 
 	for(i = 0; i < gs->nplayers * CPP; i++) {
 		p = i % gs->nplayers;
@@ -66,9 +65,8 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, u
 
 	initDeck(&gs->deck);
 	initPile(&gs->pile);
-	gs->players = calloc(nplayers, sizeof(struct player));
-	assert(gs->players);
 	gs->nplayers = nplayers;
+	memset(gs->players, 0, sizeof(struct player) * nplayers);
 	deal(gs);
 	*gs->pile.top = *gs->deck.top++;
 	gs->pile.n++;
@@ -83,7 +81,6 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, u
 
 void cleanGameState(struct gamestate* const restrict gs)
 {
-	free(gs->players);
 	gs->deck.top = gs->deck.c;
 	gs->pile.top = gs->pile.c;
 	gs->deck.n = 0;
@@ -282,8 +279,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 	uint32_t ptm;
 	struct aistate as = { .gs = gs };
 
-	{	assert(gs);
-		assert(gs->players);}
+	assert(gs);
 
 	while(getGameState(gs)) {
 		if(likely(!eight)) gs->eightSuit = Unknown;

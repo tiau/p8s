@@ -5,7 +5,6 @@ void dealStateSans(struct gamestate* const restrict gs, const struct gamestate* 
 	size_t i, j;
 
 	{	assert(gs);
-		assert(gs->players);
 		assert(gs->nplayers == ogs->nplayers);}
 
 	gs->players[0] = *stateToPlayer(ogs);
@@ -27,14 +26,12 @@ void initGameStateHypoShared(struct gamestate* const restrict gs, const struct g
 {
 	{	assert(gs);
 		assert(ogs->pile.n);
-		assert(ogs->players);
 		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);}
 
 	gs->pile = ogs->pile;
 	gs->pile.top = gs->pile.c + ogs->pile.n - 1;
-	gs->players = calloc(ogs->nplayers, sizeof(struct player));
-	assert(gs->players);
 	gs->nplayers = ogs->nplayers;
+	memset(gs->players, 0, sizeof(struct player) * gs->nplayers);
 	gs->turn = 0;
 	gs->eightSuit = ogs->eightSuit;
 	gs->drew = ogs->drew;

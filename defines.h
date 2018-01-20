@@ -71,7 +71,7 @@ struct gamestate {
 	struct deck deck;
 	struct deck pile;
 	size_t nplayers;
-	struct player* players;
+	struct player players[MAXPLRS];
 	bool drew;			// If the current player has drawn a card
 	bool magic;			// If the current card should have a special effect
 	suit_t eightSuit;	// Suit to go on top of 8s, if magic

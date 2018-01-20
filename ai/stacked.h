@@ -2,22 +2,21 @@
 
 /* The Stacked AI is the same as the Monte AI except that instead of just
  * randomly shuffling all the cards that it doesn't know about (opponents'
- * hands and the deck) it tends to put magic cards (2s, 3s, 8s) into its
- * opponents hands, as smart players will likely be holding these cards. */
+ * hands and the deck) it gives the opponent good hands per evalPlayer()
+ * depending on how many cards they've recently drawn. */
 
 #ifndef AI_STACKED_H
 #define AI_STACKED_H
 
+/* The max number of different deals to attempt */
+#define MAXDEALS 18
+
 /* What AI to call to play hypothetical games */
 #define STACKEDAIF aiJudge
 
-void stackTheDeck(struct deck* const restrict deck,
-				  const size_t tch)
-	__attribute__((hot,nonnull));
-    
 void initStackedGameStateHypothetical(struct gamestate* const restrict gs,
 									  const struct gamestate* const restrict ogs)
-	__attribute__((hot,nonnull));
+	__attribute__((hot,nonnull,const));
 
 uint_fast32_t aiStacked(const struct aistate* const restrict as)
 	__attribute__((hot,nonnull));

@@ -1,50 +1,61 @@
 #include "stacked.h"
 
-// TODO: we could do a lot more than just stack the deck via magic cards and eights, people are also likely to be holding pairs, straights, flushes, etc.
-void stackTheDeck(struct deck* const restrict deck, const size_t tch)
+__attribute__((hot,nonnull)) static void copyGameState(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
-	size_t i, j, o, ds;
-	size_t open[tch];
-	card_t t;
+	{	assert(gs);
+		assert(ogs);}
 
-	{	assert(deck);
-		assert(tch);}
+	memcpy(gs->deck.c, ogs->deck.c, DECKLEN * sizeof(card_t));
+	memcpy(gs->players, ogs->players, ogs->nplayers * sizeof(struct player));
+	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(uint_fast16_t));
+}
 
-	if(tch < deck->n) {
-		/* Find open slots for magic cards to go in the first tch cards */
-		ds = DECKLEN - deck->n;
-		for(i = ds, o = 0; i < (tch + ds) && i < (deck->n + ds); i++) {
-			t = getVal(deck->c[i]);
-			if(t != 2 && t != 3 && t != 8)
-				open[o++] = i;
-		}
+/* TODO: tune this; ideas: player's handsize, more than the immediate next player, better function + maxdeals */
+__attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct gamestate* const restrict gs)
+{
+	int_fast8_t deals = MAXDEALS;
+	size_t i;
 
-		/* 10% chance to move magic cards to opponents' hands, 20% for eights */
-		for(i = tch + ds, j = 0; i < deck->n && j < o; i++) {
-			t = getVal(deck->c[i]);
-			if(((t == 2 || t == 3) && rand() % 10 == 0) || (t == 8 && rand() % 5 == 0))
-				cardSwap(&deck->c[i], &deck->c[open[j++]]);
-		}
-	}
+	assert(gs);
+
+	for(i = 0; i < 8; i++)
+		deals -= ((gs->draws[gs->turn + 1 % gs->nplayers] >> i) & 3) / (i / 4 + 1);
+
+	if(unlikely(deals < 2))
+		deals = 2;
+
+	return deals;
 }
 
 void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
-	size_t tch = 0;
+	size_t i;
+	uint_fast8_t deals;
+	int_fast16_t score, bscore = 32767;
+	struct gamestate bgs;
 
 	{	assert(ogs);
 		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);}
 
-	/* Calculate how many cards our opponents hold, for deck stacking */
-	size_t cih[ogs->nplayers];
-	populateCIH(ogs, cih);
-	for(size_t i = 0; i < ogs->nplayers-1; i++)
-		tch += cih[i];
+	initGameStateHypoShared(&bgs, ogs);
+	deals = scoreDraws(ogs);
 
-	initGameStateHypoShared(gs, ogs);
-	initDeckSans(&gs->deck, stateToPlayer(ogs), &ogs->pile);
-	stackTheDeck(&gs->deck, tch);
-	dealStateSans(gs, ogs);
+	for(i = 0; ; i++) {
+		initGameStateHypoShared(gs, ogs);
+		initDeckSans(&gs->deck, stateToPlayer(ogs), &ogs->pile);
+		dealStateSans(gs, ogs);
+		score = evalPlayer(&gs->players[gs->turn + 1 % gs->nplayers], gs->nplayers);
+		if(score < bscore) {
+			copyGameState(&bgs, gs);
+			bscore = score;
+		}
+		if(i > deals)
+			break;
+		cleanGameState(gs);
+	}
+
+	copyGameState(gs, &bgs);
+	cleanGameState(&bgs);
 }
 
 uint_fast32_t aiStacked(const struct aistate* const restrict as)

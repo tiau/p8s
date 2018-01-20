@@ -16,7 +16,7 @@
 
 void initStackedGameStateHypothetical(struct gamestate* const restrict gs,
 									  const struct gamestate* const restrict ogs)
-	__attribute__((hot,nonnull,const));
+	__attribute__((hot,nonnull));
 
 uint_fast32_t aiStacked(const struct aistate* const restrict as)
 	__attribute__((hot,nonnull));

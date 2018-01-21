@@ -48,7 +48,8 @@ includegraph: ${FAI}
 
 profile: ${FAI}
 	${cc} -fprofile-generate ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -o p8
-	./p8 -m68 >/dev/null
+	./p8 -m68 -p 3C -h '0H 9H 8H 7H 6H 5H 8D' -h '2C 2D 6C 6D 7S 9S 0D' >/dev/null
+	./p8 -m79 -p 3C -h '0H 9H 8H 7H 6H 5H 8D' -h '2C 2D 6C 6D 7S 9S 0D' >/dev/null
 	${cc} ${PFLAGS} ${CFLAGS} ${WFLAGS} ${RFLAGS} ${FAI} ${SFLAGS} -s -o p8
 	@make clean
 

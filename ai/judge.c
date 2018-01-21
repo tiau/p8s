@@ -91,7 +91,7 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 						ret -= nvals[3]-1;
 						break;
 					default:
-						assert(false);
+						ret -= 2;
 				}
 				break;
 			case 8:

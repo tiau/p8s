@@ -137,7 +137,6 @@ bool playerDrawCard(struct gamestate* const gs, struct player* const player)
 	{	assert(gs);
 		assert(player);
 		assert(player->n + 1 < DECKLEN);
-		assert(gs->deck.n);
 		assert((size_t)(gs->deck.top - gs->deck.c) == DECKLEN - gs->deck.n);}
 
 	if(!gs->deck.n)

@@ -49,7 +49,7 @@ uint_fast32_t human(const struct aistate* const restrict as)
 		play = plistGet(as->pl, i);
 		th = humanCardHash(play);
 		if(lh != th)
-			printf("\n\t");
+			printf("\b\b  \n\t");
 		lh = th;
 		printf("%zu: ", i);
 		showPlay(play);

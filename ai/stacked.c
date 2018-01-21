@@ -10,20 +10,27 @@ __attribute__((hot,nonnull)) static void copyGameState(struct gamestate* const r
 	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(uint_fast16_t));
 }
 
-/* TODO: tune this; ideas: player's handsize, more than the immediate next player, better function + maxdeals */
+__attribute__((hot,const,always_inline)) inline static float maxf(const float a, const float b)
+{
+	if(a > b)
+		return a;
+	return b;
+}
+
+/* TODO: tune this: take more than immediate next player into consideration + other stuff? */
 __attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct gamestate* const restrict gs)
 {
-	int_fast8_t deals = MAXDEALS;
+	int_fast8_t deals;
 	size_t i;
-
-	assert(gs);
+	float chancenonrandom = 1.0f;
+	const uint_fast16_t td = gs->draws[(gs->turn + 1) % gs->nplayers];
+	const uint_fast8_t tcc = gs->players[(gs->turn + 1) % gs->nplayers].n;
 
 	for(i = 0; i < 8; i++)
-		deals -= ((gs->draws[gs->turn + 1 % gs->nplayers] >> i) & 3) / (i / 4 + 1);
+		chancenonrandom *= maxf(1.0f - (float)((td >> (i * 2)) & 3) / (((float)i + 1.0f) * (float)tcc), 0.0f);
+	deals = (float)MAXDEALS * chancenonrandom;
 
-	if(unlikely(deals < 2))
-		deals = 2;
-
+	assert(deals >= 0);
 	return deals;
 }
 
@@ -49,7 +56,7 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const
 			copyGameState(&bgs, gs);
 			bscore = score;
 		}
-		if(i > deals)
+		if(i >= deals)
 			break;
 		cleanGameState(gs);
 	}

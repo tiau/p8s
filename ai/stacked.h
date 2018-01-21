@@ -9,7 +9,7 @@
 #define AI_STACKED_H
 
 /* The max number of different deals to attempt */
-#define MAXDEALS 18
+#define MAXDEALS 8
 
 /* What AI to call to play hypothetical games */
 #define STACKEDAIF aiJudge

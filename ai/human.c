@@ -54,7 +54,7 @@ uint_fast32_t human(const struct aistate* const restrict as)
 		printf("%zu: ", i);
 		showPlay(play);
 	}
-	printf("\n");
+	printf("\b\b  \n");
 
 	for(;;) {
 		memset(b, 0, 5);

@@ -2,7 +2,11 @@
 
 gs=10
 
-make bench
+make bench >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+	echo "Failed to build"
+	exit 1
+fi
 echo -e "\nFew plays :::::::::::::::::::::::::::::::::::::::::::::::::"
 time ./p8 -p "9H 7H 7S QS AS 4S" -h "9C 7C 6C 4C KC KH 3H" -h "8H 8C 3C KS" -m66 -g2 | grep games.sec | sed 's/.*\ \([0-9]*\)\.[0-9]*\(\ games.*\)/\1\2/'
 echo -e "\nMany plays ::::::::::::::::::::::::::::::::::::::::::::::::"

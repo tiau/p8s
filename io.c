@@ -119,8 +119,8 @@ void showDrawMap(const struct gamestate* const restrict gs)
 
 	for(i = 0; i < gs->nplayers; i++) {
 		printf("Player %zu draws per turn: ", i);
-		for(j = 0; j < 32; j++)
-			printf("%zu ", (gs->draws[i] >> j*2) & 3);
+		for(j = 0; j < 8; j++)
+			printf("%zu ", (gs->draws[i] >> (j*2)) & 3);
 		printf("\n");
 	}
 }

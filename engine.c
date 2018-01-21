@@ -76,7 +76,7 @@ void initGameState(struct gamestate* const restrict gs, const size_t nplayers, u
 	gs->magic = false;
 	gs->drew = false;
 	memcpy(gs->ai, ai, nplayers * sizeof(uint_fast32_t (*const)(const struct aistate* const restrict)));
-	memset(gs->draws, 0, nplayers * sizeof(uint_fast16_t));
+	memset(gs->draws, 0xFF, nplayers * sizeof(uint_fast16_t));
 }
 
 void cleanGameState(struct gamestate* const restrict gs)
@@ -195,6 +195,7 @@ bool glHandleMagic(struct gamestate* const restrict gs, const uint8_t verbose)
 		gs->magic = false;
 
 		if(tc == 2) {
+			gs->draws[gs->turn % gs->nplayers] <<= 2;
 			drawCard(gs);
 			drawCard(gs);
 			if(unlikely(verbose)) {
@@ -209,6 +210,7 @@ bool glHandleMagic(struct gamestate* const restrict gs, const uint8_t verbose)
 			return true;
 		}
 	}
+	gs->draws[gs->turn % gs->nplayers] <<= 2;
 	return false;
 }
 
@@ -289,7 +291,6 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 			glHandleMove(&as, gs, verbose, &eight, ptm);
 			plistDel(as.pl);
 		}
-		gs->draws[gs->turn % gs->nplayers] <<= 2;
 		gs->turn++;
 	}
 	return (((gs->turn - 1) % gs->nplayers) ? -1.0 * gs->turn : gs->turn);

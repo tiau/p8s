@@ -83,7 +83,7 @@ __attribute__((cold,nonnull)) static bool verifyHypoGame(const struct gamestate*
 			return false;
 		}
 		for(j = 0; j < wp; j++) {
-			if(lfind(&gs->pile.c[i], gs->players[j].c, &gs->players[j].n, sizeof(card_t), cmpcardt)) {
+			if(lfind(&gs->pile.c[i], gs->players[j].c, (size_t*)&gs->players[j].n, sizeof(card_t), cmpcardt)) {
 				fprintf(stderr, "%s: Pile has repeat card (%i) with player %zu\n", __func__, gs->pile.c[i], j);
 				return false;
 			}
@@ -98,7 +98,7 @@ __attribute__((cold,nonnull)) static bool verifyHypoGame(const struct gamestate*
 				return false;
 			}
 			for(k = i + 1; k < wp; k++) {
-				if(lfind(&gs->players[i].c[j], gs->players[k].c, &gs->players[k].n, sizeof(card_t), cmpcardt)) {
+				if(lfind(&gs->players[i].c[j], gs->players[k].c, (size_t*)&gs->players[k].n, sizeof(card_t), cmpcardt)) {
 					fprintf(stderr, "%s: Player %zu has repeat card (%i) with player %zu\n", __func__, i, gs->players[i].c[j], k);
 					return false;
 				}
@@ -256,6 +256,7 @@ int main(int argc, char* argv[])
 					fprintf(stderr, "Option -%c requires an integer argument\n", optopt);
 				else if(isprint(optopt))
 					fprintf(stderr, "Unknown option '-%c'\n", optopt);
+				/* fallthrough */
 			default:
 				nplayers = 0;
 		}

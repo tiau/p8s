@@ -96,7 +96,7 @@ __attribute__((nonnull,returns_nonnull))
 inline static struct player* stateToPlayer(const struct gamestate* const restrict gs)
 {
 	assert(gs);
-	return &gs->players[gs->turn % gs->nplayers];
+	return (struct player*)&gs->players[gs->turn % gs->nplayers];
 }
 
 #endif /* ENGINE_H */

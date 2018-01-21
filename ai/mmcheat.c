@@ -1,89 +1,81 @@
 #include "mmcheat.h"
 
-static struct gamestate* copyGameState(struct gamestate* const restrict ret, const struct gamestate* const restrict gs)
+__attribute__((hot,nonnull)) static struct gamestate* copyGameState(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
-	{	assert(ret);
-		assert(gs);}
+	{	assert(gs);
+		assert(ogs);}
 
-	initCheatGameStateHypothetical(ret, gs);
-	ret->turn = gs->turn;
-	memcpy(ret->players, gs->players, gs->nplayers * sizeof(struct player));
-	return ret;
+	*gs = *ogs;
+	gs->deck.top = gs->deck.c + (ogs->deck.top - ogs->deck.c);
+	gs->pile.top = gs->pile.c + (ogs->pile.top - ogs->pile.c);
+	return gs;
 }
 
-static float minimax(const struct gamestate* const restrict gs, const uint8_t player, size_t depth, float alpha, float beta);
+__attribute__((hot,nonnull,pure)) static float minimax(const struct gamestate* const restrict gs, size_t depth, float alpha, float beta);
 
-static float testNode(const struct aistate* const restrict as, uint8_t player, const uint32_t which, size_t depth, const float alpha, const float beta)
+__attribute__((hot,nonnull,pure)) static float testNode(const struct aistate* const restrict as, uint32_t which, size_t depth, const float alpha, const float beta)
 {
+	struct gamestate is;
+	bool eight;
+
 	{	assert(as);
 		assert(as->pl);
 		assert(as->gs);
 		assert(as->gs->nplayers >= MINPLRS);
-		assert(as->gs->nplayers <= MAXPLRS);
-		assert(player < as->gs->nplayers);}
-	float ret;
-	struct gamestate is;
-	bool eight;
+		assert(as->gs->nplayers <= MAXPLRS);}
 
 	copyGameState(&is, as->gs);
-
-	player++;
-	if(which != as->pl->n) {
+	if(likely(which != as->pl->n)) {
+		/* TODO: Handle 8s instead of always having their given suit follow */
+		ESPACK(which, getSuit(plistGet(as->pl, which)->c[plistGet(as->pl, which)->n-1]));
 		glHandleMove(as, &is, 0, &eight, which);
-		if(unlikely(glHandleMagic(&is, 0))) {
-			player++;
-		}
-	} else {
-		if(!is.drew) {
-			drawCard(&is);
-			player--;
-			depth++;
-		} else {
+		if(unlikely(glHandleMagic(&is, 0)))
 			is.turn++;
-		}
+	} else {
+		if(!is.drew)
+			if(likely(drawCard(&is)))
+				is.turn--;
 		is.drew = !is.drew;
 	}
-	ret = minimax(&is, player % as->gs->nplayers, depth, alpha, beta);
-	return ret;
+	is.turn++;
+	return minimax(&is, depth, alpha, beta);
 }
 
-static float minimax(const struct gamestate* const restrict gs, const uint8_t player, size_t depth, float alpha, float beta)
+static float minimax(const struct gamestate* const restrict gs, size_t depth, float alpha, float beta)
 {
 	size_t i;
-	float v, bv;
+	float v;
 	struct aistate as = { .gs = gs };
 
 	for(i = 0; i < gs->nplayers; i++)
 		if(!gs->players[i].n)
-			return (i) ? -INFINITY : INFINITY;
+			return i ? -INFINITY : INFINITY;
 
 	if(!--depth) {
-		v = 0;
+		v = 0.0;
 		for(i = 0; i < gs->nplayers; i++)
-			v += (i ? 1.0 : -0.5) * evalPlayer(&gs->players[i], gs->nplayers);
+			v += (i ? 0.1 : -1.0) * evalPlayer(&gs->players[i], gs->nplayers);
 		return v;
 	}
 
 	as.pl = getPotentials(gs, stateToPlayer(gs));
-	if(!player) {
-		bv = -INFINITY;
+	if(!(gs->turn % gs->nplayers)) {
+		v = -INFINITY;
 		for(i = 0; i <= as.pl->n; i++) {
-			v = testNode(&as, player, i, depth, alpha, beta);
-			if(v > bv) bv = v;
-			alpha = max(alpha, v);
+			v = maxf(v, testNode(&as, i, depth, alpha, beta));
+			alpha = maxf(alpha, v);
 			if(beta <= alpha) break;
 		}
 	} else {
-		bv = INFINITY;
+		v = INFINITY;
 		for(i = 0; i <= as.pl->n; i++) {
-			v = testNode(&as, player, i, depth, alpha, beta);
-			if(v < bv) bv = v;
-			beta = min(beta, v);
+			v = minf(v, testNode(&as, i, depth, alpha, beta));
+			beta = minf(beta, v);
 			if(beta <= alpha) break;
 		}
 	}
 	plistDel(as.pl);
-	return bv;
+	return v;
 }
 
 uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
@@ -91,11 +83,16 @@ uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 	size_t i, best = 0;
 	float v, bv = -INFINITY;
 	uint_fast32_t ret = 0;
+	struct gamestate igs;
+	struct aistate ias = { .gs = &igs };
+
+	initCheatGameStateHypothetical(&igs, as->gs);
+	ias.pl = as->pl;
 
 	for(i = 0; i <= as->pl->n; i++) {
-		v = testNode(as, 0, i, MMDEPTH, -INFINITY, INFINITY);
+		v = testNode(&ias, i, MMDEPTH, -INFINITY, INFINITY);
 #ifdef MONTE_VERBOSE
-		printf("%sminmax:%s\t%zu\t%.0f\t", ANSI_CYAN, ANSI_DEFAULT, i, v);
+		printf("%sminmax:%s\t%zu\t%.1f\t", ANSI_CYAN, ANSI_DEFAULT, i, v);
 		if(i != as->pl->n) {
 			showPlay(plistGet(as->pl, i));
 			printf("%s %s", ANSI_BACK, ANSI_DEFAULT);
@@ -111,5 +108,7 @@ uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 
 	MPACK(ret, best);
 	ESPACK(ret, Clubs);
+	if(best != as->pl->n)
+		ESPACK(ret, getSuit(plistGet(as->pl, best)->c[plistGet(as->pl, best)->n-1]));
 	return ret;
 }

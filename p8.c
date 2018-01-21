@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 	igs.pile.n = 0;
 	igs.drew = false;
 	memset(igs.players, 0, MAXPLRS * sizeof(struct player));
-	memset(igs.draws, 0, MAXPLRS * sizeof(uint_fast64_t));
+	memset(igs.draws, 0, MAXPLRS * sizeof(draw_t));
 
 	opterr = 0;
 	while((c = getopt(argc, argv, "m:g:p:h:vr")) != -1) {

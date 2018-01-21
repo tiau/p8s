@@ -11,6 +11,7 @@
 #define unlikely(x)	__builtin_expect((x),0)
 
 typedef uint_fast8_t  suit_t, card_t;
+typedef uint_fast16_t draw_t;
 
 #define CPP 11		// Cards dealt per player at the beginning of the game
 #define MINPLRS 2	// Minimum number of players
@@ -78,7 +79,7 @@ struct gamestate {
 	/* AI to invoke for each player slot */
 	uint_fast32_t (*ai[MAXPLRS])(const struct aistate* const restrict);
 	/* A bitmap of recent drawing events, 2 bits per turn */
-	uint_fast16_t draws[MAXPLRS];
+	draw_t draws[MAXPLRS];
 };
 
 

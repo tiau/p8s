@@ -7,7 +7,7 @@ __attribute__((hot,nonnull)) static void copyGameState(struct gamestate* const r
 
 	memcpy(gs->deck.c, ogs->deck.c, DECKLEN * sizeof(card_t));
 	memcpy(gs->players, ogs->players, ogs->nplayers * sizeof(struct player));
-	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(uint_fast16_t));
+	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(draw_t));
 }
 
 __attribute__((hot,const,always_inline)) inline static float maxf(const float a, const float b)
@@ -23,7 +23,7 @@ __attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct ga
 	int_fast8_t deals;
 	size_t i;
 	float chancenonrandom = 1.0f;
-	const uint_fast16_t td = gs->draws[(gs->turn + 1) % gs->nplayers];
+	const draw_t td = gs->draws[(gs->turn + 1) % gs->nplayers];
 	const uint_fast8_t tcc = gs->players[(gs->turn + 1) % gs->nplayers].n;
 
 	for(i = 0; i < 8; i++)

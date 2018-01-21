@@ -238,7 +238,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 			if(ath < MINGAMES)
 				continue;
 			phiv = phi(z(s->wins[j], bwins, tt, btn));
-			if(phiv < PIBM || tt > MAXGAMES || act == 1) {
+			if(phiv < PIBM || unlikely(tt >= MAXGAMES || act == 1)) {
 				dead[j] = true;
 				act--;
 #ifdef MONTE_VERBOSE

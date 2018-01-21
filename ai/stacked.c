@@ -10,13 +10,6 @@ __attribute__((hot,nonnull)) static void copyGameState(struct gamestate* const r
 	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(draw_t));
 }
 
-__attribute__((hot,const,always_inline)) inline static float maxf(const float a, const float b)
-{
-	if(a > b)
-		return a;
-	return b;
-}
-
 /* TODO: tune this: take more than immediate next player into consideration + other stuff? */
 __attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct gamestate* const restrict gs)
 {

@@ -31,11 +31,10 @@ __attribute__((hot,nonnull,pure)) static float testNode(const struct aistate* co
 		glHandleMove(as, &is, 0, &eight, which);
 		if(unlikely(glHandleMagic(&is, 0)))
 			is.turn++;
-	} else {
-		if(!is.drew)
-			if(likely(drawCard(&is)))
-				is.turn--;
-		is.drew = !is.drew;
+	} else if(!is.drew) {
+		is.drew = true;
+		if(likely(drawCard(&is)))
+			is.turn--;
 	}
 	is.turn++;
 	return minimax(&is, depth, alpha, beta);

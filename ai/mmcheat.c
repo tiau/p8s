@@ -45,6 +45,7 @@ static float minimax(const struct gamestate* const restrict gs, size_t depth, fl
 	size_t i;
 	float v;
 	struct aistate as = { .gs = gs };
+	uint_fast8_t considerDraw;
 
 	for(i = 0; i < gs->nplayers; i++)
 		if(!gs->players[i].n)
@@ -57,17 +58,19 @@ static float minimax(const struct gamestate* const restrict gs, size_t depth, fl
 		return v;
 	}
 
+	considerDraw = (gs->drew || stateToPlayer(gs)->n < MAXDRAW);
+
 	as.pl = getPotentials(gs, stateToPlayer(gs));
 	if(!(gs->turn % gs->nplayers)) {
 		v = -INFINITY;
-		for(i = 0; i <= as.pl->n; i++) {
+		for(i = 0; i < as.pl->n + considerDraw; i++) {
 			v = maxf(v, testNode(&as, i, depth, alpha, beta));
 			alpha = maxf(alpha, v);
 			if(beta <= alpha) break;
 		}
 	} else {
 		v = INFINITY;
-		for(i = 0; i <= as.pl->n; i++) {
+		for(i = 0; i < as.pl->n + considerDraw; i++) {
 			v = minf(v, testNode(&as, i, depth, alpha, beta));
 			beta = minf(beta, v);
 			if(beta <= alpha) break;
@@ -84,11 +87,12 @@ uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 	uint_fast32_t ret = 0;
 	struct gamestate igs;
 	struct aistate ias = { .gs = &igs };
+	const uint_fast8_t considerDraw = (as->gs->drew || stateToPlayer(as->gs)->n < MAXDRAW);
 
 	initCheatGameStateHypothetical(&igs, as->gs);
 	ias.pl = as->pl;
 
-	for(i = 0; i <= as->pl->n; i++) {
+	for(i = 0; i < as->pl->n + considerDraw; i++) {
 		v = testNode(&ias, i, MMDEPTH, -INFINITY, INFINITY);
 #ifdef MONTE_VERBOSE
 		printf("%sminmax:%s\t%zu\t%.1f\t", ANSI_CYAN, ANSI_DEFAULT, i, v);

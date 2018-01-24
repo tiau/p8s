@@ -8,7 +8,12 @@
 #define AI_MMCHEAT_H
 
 /* How many plies we search before evaluating */
-#define MMDEPTH 8
+#define MMDEPTH 7
+
+/* The hand size at which we cease considering drawing more cards. Letting this
+ * be unbounded results in the AI drawing so many cards that its evaluation to
+ * MMDEPTH plies becomes too slow. */
+#define MAXDRAW (CPP + 3)
 
 uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 	__attribute__((hot,pure,nonnull));

@@ -194,7 +194,6 @@ bool glHandleMagic(struct gamestate* const restrict gs, const uint8_t verbose)
 		gs->magic = false;
 
 		if(tc == 2) {
-			gs->draws[gs->turn % gs->nplayers] <<= 2;
 			drawCard(gs);
 			drawCard(gs);
 			if(unlikely(verbose)) {
@@ -209,7 +208,6 @@ bool glHandleMagic(struct gamestate* const restrict gs, const uint8_t verbose)
 			return true;
 		}
 	}
-	gs->draws[gs->turn % gs->nplayers] <<= 2;
 	return false;
 }
 
@@ -289,6 +287,7 @@ float gameLoop(struct gamestate* const restrict gs, const uint8_t verbose, bool 
 			ptm = glEvalMoves(&as, gs, verbose);
 			glHandleMove(&as, gs, verbose, &eight, ptm);
 			plistDel(as.pl);
+			gs->draws[gs->turn % gs->nplayers] <<= 2;
 		}
 		gs->turn++;
 	}

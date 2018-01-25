@@ -10,7 +10,7 @@ __attribute__((hot,nonnull)) static void copyGameState(struct gamestate* const r
 	memcpy(gs->draws, ogs->draws, ogs->nplayers * sizeof(draw_t));
 }
 
-/* TODO: tune this: take more than immediate next player into consideration + other stuff? */
+/* TODO: take more than immediate next player into consideration? */
 __attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct gamestate* const restrict gs)
 {
 	int_fast8_t deals;
@@ -19,8 +19,8 @@ __attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct ga
 	const draw_t td = gs->draws[(gs->turn + 1) % gs->nplayers];
 	const uint_fast8_t tcc = gs->players[(gs->turn + 1) % gs->nplayers].n;
 
-	for(i = 0; i < 8; i++)
-		chancenonrandom *= maxf(1.0f - (float)((td >> (i * 2)) & 3) / (((float)i + 1.0f) * (float)tcc), 0.0f);
+	for(i = 1; i < 8; i++)
+		chancenonrandom *= maxf(0.0f, 1.0f - (float)((td >> (i * 2)) & 3) / ((float)i * (float)tcc));
 	deals = (float)MAXDEALS * chancenonrandom;
 
 	assert(deals >= 0);

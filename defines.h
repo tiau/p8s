@@ -116,18 +116,6 @@ inline static size_t max(const size_t x, const size_t y)
 	return (x > y ? x : y);
 }
 
-__attribute__((hot,const,always_inline))
-inline static float minf(const float x, const float y)
-{
-	return (x > y ? y : x);
-}
-
-__attribute__((hot,const,always_inline))
-inline static float maxf(const float x, const float y)
-{
-	return (x > y ? x : y);
-}
-
 #define likely(x)	__builtin_expect((x),1)
 #define unlikely(x)	__builtin_expect((x),0)
 

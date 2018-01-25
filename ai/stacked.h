@@ -23,4 +23,16 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs,
 uint_fast32_t aiStacked(const struct aistate* const restrict as)
 	__attribute__((hot,nonnull));
 
+__attribute__((hot,const,always_inline))
+inline static float minf(const float x, const float y)
+{
+	return (x > y ? y : x);
+}
+
+__attribute__((hot,const,always_inline))
+inline static float maxf(const float x, const float y)
+{
+	return (x > y ? x : y);
+}
+
 #endif /* AI_STACKED_H */

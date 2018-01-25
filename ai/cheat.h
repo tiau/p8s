@@ -1,4 +1,4 @@
-#include "monte.h"
+#include "stacked.h"
 #include "random.h"
 
 /* The Cheat AI is the same as the Monte AI except that it doesn't shuffle its

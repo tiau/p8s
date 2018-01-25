@@ -51,7 +51,7 @@ __attribute__((hot,nonnull)) static void initGameStateHypothetical(struct gamest
 __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngames, const struct play* const restrict gtp, const suit_t forces, const struct aistate* const restrict as, uint_fast32_t (*aif)(const struct aistate* const restrict), void (*initgs)(struct gamestate* const restrict, const struct gamestate* const restrict))
 {
 	size_t i, ret = 0;
-	bool e;			// Whether we're testing a suit
+	bool e; // Whether we're testing a suit
 	struct gamestate gs;
 	bool magic = likely(forces == Unknown && gtp);
 
@@ -88,7 +88,7 @@ __attribute__((hot,nonnull(5,6))) static size_t playHypoGames(const size_t ngame
 		}
 
 		if(unlikely(!gs.players[0].n)) {
-			ret = MAXGAMES;
+			ret = MaxGames;
 			cleanGameState(&gs);
 			break;
 		}
@@ -185,7 +185,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 	size_t i, j, k, m;
 	const struct play* restrict play;
 	const size_t nump = s->nplays;
-	size_t hmg = MINGAMES;
+	size_t hmg = MinGames;
 	bool dead[nump];
 	float scores[nump];
 	float best, ath;
@@ -235,14 +235,14 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 				continue;
 			tt = s->trials[j];
 			ath = min(tt, btn);
-			if(ath < MINGAMES)
+			if(ath < MinGames)
 				continue;
 			phiv = phi(z(s->wins[j], bwins, tt, btn));
-			if(phiv < PIBM || unlikely(tt >= MAXGAMES || act == 1)) {
+			if(phiv < pCutOff || unlikely(tt >= MaxGames || act == 1)) {
 				dead[j] = true;
 				act--;
 #ifdef MONTE_VERBOSE
-				printf("%s%s:%s  %zu\t(%.1f%%\t%.1f%%)\t%.1f%%\t", ANSI_CYAN, name, ANSI_DEFAULT, j, 100*phiv, 100.0*((float)tt) / (float)MAXGAMES, 100.0*scores[j]);
+				printf("%s%s:%s  %zu\t(%.1f%%\t%.1f%%)\t%.1f%%\t", ANSI_CYAN, name, ANSI_DEFAULT, j, 100*phiv, 100.0*((float)tt) / (float)MaxGames, 100.0*scores[j]);
 				if(j+1 == nump)
 					printf("(%s)  ", ((s->as->gs->drew) ? "pass" : "draw"));
 				else
@@ -258,7 +258,7 @@ __attribute__((nonnull,hot)) static void controlThread(const struct pctmstate* c
 __attribute__((nonnull,hot)) static void* monteThread(void* arg)
 {
 	char tbuf[BUFSZ];
-	const struct play* gtp;
+	const struct play* gtp; // The play to make (NULL to draw/pass)
 	size_t bucket;			// Which wins/trials bucket to use
 	size_t wp;				// Which play to make
 	size_t ngames;			// How many games to play
@@ -413,7 +413,8 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 	gettimeofday(&tval_after, NULL);
 	timersub(&tval_after, &tval_before, &tval_result);
 	size_t s = 0;
-	for(size_t i = 0; i < nump; i++) s += trials[i];
+	for(size_t i = 0; i < nump; i++)
+		s += trials[i];
 	printf("%zu games in %ld.%06ld seconds, %f games/sec\n", s, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec, (float)s/((float)tval_result.tv_sec+(float)tval_result.tv_usec/1000000));
 #endif
 	pthread_rwlock_destroy(&rwl);
@@ -422,5 +423,5 @@ uint_fast32_t pctmRun(const struct aistate* const restrict as, void (*initgs)(st
 
 uint_fast32_t aiMonte(const struct aistate* const restrict as)
 {
-	return pctmRun(as, initGameStateHypothetical, MONTEAIF, __func__);
+	return pctmRun(as, initGameStateHypothetical, MonteSub, __func__);
 }

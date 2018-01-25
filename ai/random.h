@@ -1,6 +1,6 @@
 #include "../plist.h"
 
-/* The random AI selects a random play to make.  If that play ends on an 8 it
+/* The random AI selects a random play to make. If that play ends on an 8 it
  * selects a random suit to come next. */
 
 #ifndef AI_RANDOM_H

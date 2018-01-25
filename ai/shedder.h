@@ -1,8 +1,8 @@
 #include "../engine.h"
 
 /* The shedder AI selects the first play it comes across that drops the maximum
- * number of cards it can drop on a given turn.  For example, it will play a
- * flush before a four of a kind, and a four of a kind before a pair.  After
+ * number of cards it can drop on a given turn. For example, it will play a
+ * flush before a four of a kind, and a four of a kind before a pair. After
  * playing an 8 it selects the suit that was most populous in its hand. */
 
 #ifndef AI_SHEDDER_H

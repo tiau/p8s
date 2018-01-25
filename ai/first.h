@@ -1,7 +1,7 @@
 #include "../defines.h"
 
-/* The first AI for pokereights ever created by anyone!  What fun.  This AI
- * just selects the first play from the given playlist.  If it has to decide
+/* The first AI for pokereights ever created by anyone! What fun. This AI
+ * just selects the first play from the given playlist. If it has to decide
  * which suit should follow an 8 it always chooses clubs. */
 
 #ifndef AI_FIRST_H

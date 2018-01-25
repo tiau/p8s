@@ -51,6 +51,7 @@ static float minimax(const struct gamestate* const restrict gs, size_t depth, fl
 		if(!gs->players[i].n)
 			return i ? -INFINITY : INFINITY;
 
+	/* TODO: evaluate all plays here, instead of just the players' hands */
 	if(!--depth) {
 		v = 0.0;
 		for(i = 0; i < gs->nplayers; i++)
@@ -58,7 +59,7 @@ static float minimax(const struct gamestate* const restrict gs, size_t depth, fl
 		return v;
 	}
 
-	considerDraw = (gs->drew || stateToPlayer(gs)->n < MAXDRAW);
+	considerDraw = (gs->drew || stateToPlayer(gs)->n < MaxCards);
 
 	as.pl = getPotentials(gs, stateToPlayer(gs));
 	if(!(gs->turn % gs->nplayers)) {
@@ -87,13 +88,13 @@ uint_fast32_t aiMmCheat(const struct aistate* const restrict as)
 	uint_fast32_t ret = 0;
 	struct gamestate igs;
 	struct aistate ias = { .gs = &igs };
-	const uint_fast8_t considerDraw = (as->gs->drew || stateToPlayer(as->gs)->n < MAXDRAW);
+	const uint_fast8_t considerDraw = (as->gs->drew || stateToPlayer(as->gs)->n < MaxCards);
 
 	initCheatGameStateHypothetical(&igs, as->gs);
 	ias.pl = as->pl;
 
 	for(i = 0; i < as->pl->n + considerDraw; i++) {
-		v = testNode(&ias, i, MMDEPTH, -INFINITY, INFINITY);
+		v = testNode(&ias, i, MaxPlies, -INFINITY, INFINITY);
 #ifdef MONTE_VERBOSE
 		printf("%sminmax:%s\t%zu\t%.1f\t", ANSI_CYAN, ANSI_DEFAULT, i, v);
 		if(i != as->pl->n) {

@@ -21,7 +21,7 @@ __attribute__((hot,nonnull,pure)) static uint_fast8_t scoreDraws(const struct ga
 
 	for(i = 1; i < 8; i++)
 		chancenonrandom *= maxf(0.0f, 1.0f - (float)((td >> (i * 2)) & 3) / ((float)i * (float)tcc));
-	deals = (float)MAXDEALS * chancenonrandom;
+	deals = (float)MaxDeals * chancenonrandom;
 
 	assert(deals >= 0);
 	return deals;
@@ -60,5 +60,5 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const
 
 uint_fast32_t aiStacked(const struct aistate* const restrict as)
 {
-	return pctmRun(as, initStackedGameStateHypothetical, STACKEDAIF, __func__);
+	return pctmRun(as, initStackedGameStateHypothetical, StackedSub, __func__);
 }

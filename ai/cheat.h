@@ -2,8 +2,8 @@
 #include "random.h"
 
 /* The Cheat AI is the same as the Monte AI except that it doesn't shuffle its
- * opponents' hands into the deck and then deal them new cards.  Instead it
- * leaves all the hands as they are.  It also doesn't shuffle the deck.  In
+ * opponents' hands into the deck and then deal them new cards. Instead it
+ * leaves all the hands as they are. It also doesn't shuffle the deck. In
  * short, it cheats, a lot. */
 
 #ifndef AI_CHEAT_H

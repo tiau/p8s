@@ -8,11 +8,13 @@
 #ifndef AI_STACKED_H
 #define AI_STACKED_H
 
-/* The max number of different deals to attempt */
-#define MAXDEALS 8
+/* The max number of different deals to attempt. This is essentially a measure
+ * of pessimism, the more deals the more likely Stacked is to think its
+ * opponent has a good hand. */
+static const size_t MaxDeals = 8;
 
 /* What AI to call to play hypothetical games */
-#define STACKEDAIF aiJudge
+__attribute__((unused)) static uint_fast32_t (*StackedSub)(const struct aistate* const restrict) = aiDraw;
 
 void initStackedGameStateHypothetical(struct gamestate* const restrict gs,
 									  const struct gamestate* const restrict ogs)

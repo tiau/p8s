@@ -41,16 +41,19 @@ __attribute__((nonnull)) static void rotateAi(uint_fast32_t (**ar)(const struct 
 __attribute__((cold)) static void showStats(void)
 {
 	size_t i, j;
+	size_t lwins[nplayers];
 
-	rotateSt(successes, nplayers, nplayers - offset);
+	memcpy(lwins, successes, nplayers * sizeof(size_t));
+	rotateSt(lwins, nplayers, nplayers - offset);
 	printf("\n");
 	for(i = 0; i < nplayers; i++)
-		printf("Player %zu won %zu games (%.1f%%)\n", i, successes[i], 100.0*successes[i]/ngames);
+		printf("Player %zu won %zu games (%.1f%%)\n", i, lwins[i], 100.0*lwins[i]/ngames);
 	if(ngames > 9) {
 		printf("\n");
 		for(i = 0; i < nplayers; i++)
-			for(j = i + 1;  j < nplayers; j++)
-				printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(successes[i], successes[j], ngames, ngames)));
+			for(j = 0;  j < nplayers; j++)
+				if(lwins[i] > lwins[j])
+					printf("Player %zu is better than player %zu with %.2f%% certainty\n", i, j, 100*phi(z(lwins[i], lwins[j], ngames, ngames)));
 	}
 }
 

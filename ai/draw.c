@@ -27,7 +27,6 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	struct player *p, tp;
 	struct deck td;
 	ssize_t cur;
-	suit_t fs;
 	card_t c;
 	uint_fast32_t ret;
 
@@ -47,27 +46,40 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	suit_t ns = getSuit(*as->gs->pile.top);
 	card_t nv = getVal(*as->gs->pile.top);
 	if(!as->gs->drew) {
+		/* Count how many of the possible draws will make our hand better */
 		while(td.n--) {
 			tp = *p;
 			tp.c[tp.n++] = *td.top++;
-			hmb += (evalPlayer(&tp, as->gs->nplayers) + 5 < cur);
+			hmb += (evalPlayer(&tp, as->gs->nplayers) + DrawThreshold < cur);
 		}
-	/* We can't draw, so only consider passing if we can only make one play and
-	 * that play ends in an eight and the next player has more than one card */
-	} else if(as->pl->n == 1 &&
-			  getVal(plistGet(as->pl, 0)->c[0]) == 8 &&
-			  as->gs->players[(p + 1 - as->gs->players) % as->gs->nplayers].n > 1) {
-		while(td.n--) {
-			c = *td.top++;
-			fs = getSuit(c);
-			hmb += 0.05 + (fs == as->gs->eightSuit ||
-					      (as->gs->eightSuit == Unknown && fs == ns) ||
-					      getVal(c) == 8 ||
-					      getVal(c) == nv);
+	/* We can't draw, don't even consider passing if there are only two players
+	 * and they just played an 8 */
+	} else if(likely(as->gs->nplayers != 2 || as->gs->eightSuit == Unknown)) {
+		const struct play* const restrict ptm = plistGet(as->pl, MUPACK(ret));
+		const suit_t playsuit = getVal(ptm->c[ptm->n-1]) == 8 ? ESUPACK(ret) : getSuit(ptm->c[ptm->n-1]);
+		const suit_t passsuit = as->gs->eightSuit == Unknown ? ns : as->gs->eightSuit;
+		const card_t playval = getVal(ptm->c[ptm->n-1]);
+		const card_t passval = nv;
+		/* If nothing we would do would change anything, it doesn't matter what
+		 * we do. TODO: consider getting a new move in this case */
+		if(likely(playsuit != passsuit || playval != passval)) {
+			suit_t lsuit;
+			card_t lval;
+			/* Count how often passing tends to help/hurt */
+			while(td.n--) {
+				c = *td.top++;
+				lsuit = getSuit(c);
+				lval = getVal(c);
+				if(unlikely(lval != 8))
+					hmb += (lsuit == playsuit && lsuit != passsuit) * PlaySuitMult
+						-  (lsuit == passsuit && lsuit != playsuit) * PassSuitMult
+						+  (lval == playval && lval != passval) * PlayValMult
+						-  (lval == passval && lval != playval) * PassValMult;
+			}
 		}
 	}
 
-	if(hmb/ds > 0.5f)
+	if(unlikely(hmb/ds > 0.5f))
 		MPACK(ret, as->pl->n);
 #ifdef JUDGE_VERBOSE
 	printf("%sdraw:%s\t%zu\t\t\t%.2f\t%s\n", ANSI_CYAN, ANSI_DEFAULT, as->pl->n, hmb/ds, (as->gs->drew) ? "pass" : "draw");

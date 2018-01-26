@@ -1,0 +1,5 @@
+#!/bin/bash
+if [ -n "$1" ] ; then
+	r=$(((RANDOM%$#)+1))
+	echo "${!r}"
+fi

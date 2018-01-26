@@ -1,6 +1,6 @@
 #include "mmcheat.h"
 
-__attribute__((hot,nonnull)) static struct gamestate* copyGameState(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
+__attribute__((hot,nonnull)) static void copyGameState(struct gamestate* const restrict gs, const struct gamestate* const restrict ogs)
 {
 	{	assert(gs);
 		assert(ogs);}
@@ -8,7 +8,6 @@ __attribute__((hot,nonnull)) static struct gamestate* copyGameState(struct games
 	*gs = *ogs;
 	gs->deck.top = gs->deck.c + (ogs->deck.top - ogs->deck.c);
 	gs->pile.top = gs->pile.c + (ogs->pile.top - ogs->pile.c);
-	return gs;
 }
 
 __attribute__((hot,nonnull,pure)) static float minimax(const struct gamestate* const restrict gs, size_t depth, float alpha, float beta);

@@ -62,7 +62,7 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 		const card_t passval = nv;
 		/* If nothing we would do would change anything, it doesn't matter what
 		 * we do. TODO: consider getting a new move in this case */
-		if(likely(playsuit != passsuit || playval != passval)) {
+		if(likely(playsuit != passsuit || playval != passval || isMagicCard(playval))) {
 			suit_t lsuit;
 			card_t lval;
 			/* Count how often passing tends to help/hurt */

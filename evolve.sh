@@ -8,6 +8,7 @@ if [ -n "`ls -l dna/ | grep total.0`" ] ; then
 	done
 fi
 mkdir -p scores/dna 2>/dev/null
+mkdir dead 2>/dev/null
 
 games=10000
 scoretobeat=5100
@@ -44,7 +45,7 @@ if [ -n "$1" ] ; then
 	best=$1
 fi
 
-while [ 1 ] ; do
+while [ $envfactor -gt 1 ] ; do
 	echo -------------------------------------------------------------
 	echo ">>> This is gen: $gen, scoretobeat: $scoretobeat, best: $best"
 	echo -------------------------------------------------------------
@@ -70,7 +71,7 @@ while [ 1 ] ; do
 			continue
 		fi
 		echo "$i  DIED  , score: $score"
-		rm "$i"
+		mv "$i" dead/
 	done
 
 	echo -------------------------------------------------------------
@@ -78,9 +79,7 @@ while [ 1 ] ; do
 	while [ "`ls -l dna/ | wc -l`" -lt $minpop ] ; do
 		echo "WARNING: Population bottleneck!"
 		mutateandmerge
-		if [ $envfactor -gt 0 ] ; then
-			let "envfactor--"
-		fi
+		let "envfactor--"
 	done
 
 	scoretobeat=$((envfactor+"`echo "$scores" | tr ' ' '\n' | grep [0-9] | sort | head -1`"))

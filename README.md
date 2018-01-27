@@ -1,3 +1,21 @@
+## Judge-optimization branch notes:
+
+This branch has some scripts that implement a hacky genetic algorithm to optimize the judge AI. The first AI has been replaced with a copy of the judge AI that uses values that need to be defined on the commandline.
+
+- cleancruft.sh :: Removes dead dna with scores below argv1
+- csetup.sh :: Generates .o files for faster compilation, run once
+- c.sh :: Compiles with a given dna, used by evolve.sh
+- evolve.sh :: Main evolution script, pass it scoretobeat and environment harshness; also supports 'mergemutate' to just invoke merge and mutation on live dna and newscore file1, file2, ... to update scores for the given dna
+- mergedna.py :: Takes two dna files and creates an offspring
+- newmergedna.sh :: Wrapper for mergedna.py, gets child name and moves it to active dna directory, used by evolve.sh
+- newrandodna.sh :: Wrapper for randodna.py, gets child name and moves it to active dna directory, used by evolve.sh
+- randodna.py :: Takes a dna file and outputs a new one with mutations
+- randof :: Returns 1 of its arguments
+- readscores.sh :: Returns a sorted list of all living and dead dna with their scores
+- represented.sh :: Shows which dna values are represented in a directory or in the top N dnas per readscores.sh
+- start.dna :: An initial dna seed that matches the judge ai
+
+
 # Pokereights: A silly card game
 
 ## It's like Crazy Eights and Poker got squished together for no reason whatsoever.

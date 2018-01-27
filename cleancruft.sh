@@ -11,7 +11,7 @@ fi
 
 echo "Gathering cruft (score < $minscore) to clean..."
 
-for i in `./readscores.sh | sed 's/\ /-/'` ; do
+for i in `./readscores.sh | grep dead | sed 's/\ /-/'` ; do
 	score="`echo "$i" | awk -F- '{ print $1 }'`"
 	if [ $score -lt $minscore ] ; then
 		fn="`echo "$i" | awk -F- '{ print $2 }'`"

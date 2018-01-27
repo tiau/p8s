@@ -95,7 +95,7 @@ while [ 1 ] ; do
 	echo ">>> Gen: $gen, alive: $alive, scoretobeat: $scoretobeat, best: $best, env: $envfactor, bottlenecks: $bottlenecks"
 	line
 
-	if [ $alive -gt $maxpop ] ; then
+	if [ $alive -ge $maxpop ] ; then
 		let "envfactor++"
 	fi
 
@@ -122,7 +122,11 @@ while [ 1 ] ; do
 			continue
 		fi
 		echo "$i died $score"
-		mv "$i" dead/
+		if [ $score -lt $((best-300)) ] ; then
+			rm "$i"
+		else
+			mv "$i" dead/
+		fi
 	done
 
 	line
@@ -130,7 +134,7 @@ while [ 1 ] ; do
 	population="`ls -l dna/ | wc -l`"
 	while [ $population -lt $minpop ] ; do
 		mutateandmerge
-		if [ $envfactor -ge 1 ] ; then
+		if [ $envfactor -gt 1 ] ; then
 			let "envfactor--"
 		fi
 		let "scoretobeat-=5"
@@ -139,6 +143,7 @@ while [ 1 ] ; do
 		if [ $population -le 1 ] ; then
 			echo "WARNING: Everyone died! Resurrecting top $maxpop dnas"
 			mv `./readscores.sh | tail -n$maxpop | awk '{ print $2 }' | xargs` dna/
+			scores=$((best-100))
 		fi
 	done
 

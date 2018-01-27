@@ -37,6 +37,11 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
 
 	ret = aiJudge(as);
+
+	/* Don't draw or pass if playing will win */
+	if(unlikely(ret < -15000))
+		return ret;
+
 	p = stateToPlayer(as->gs);
 	cur = evalPlayer(p, as->gs->nplayers);
 

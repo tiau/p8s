@@ -1,15 +1,15 @@
 #include "judge.h"
 
 // TODO: tune tunables all throughout this function and evalPlay
-int_fast16_t evalPlayer(const struct player* const restrict player, const size_t nplayers)
+__attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* const restrict player, const size_t nplayers)
 {
 	size_t i, run = 0, mr = 0;
 	int_fast16_t ret = 0;
 	size_t nsuits[4] = { 0 },  nvals[(DECKLEN/4)+1] = { 0 };
 	size_t suits[player->n], vals[player->n];
 
-	assert(player);
-	assert(nplayers >= MINPLRS && nplayers <= MAXPLRS);
+	{	assert(player);
+		assert(nplayers >= MINPLRS && nplayers <= MAXPLRS);}
 
 	if(!player->n)
 		return -32768;
@@ -105,16 +105,16 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 	}
 
 	return ret;
-} __attribute__((hot,pure,nonnull))
+}
 
-int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplayers, const size_t* const restrict cih, const suit_t bestsuit)
+__attribute__((hot,pure,nonnull)) int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplayers, const size_t* const restrict cih, const suit_t bestsuit)
 {
 	size_t i;
 	int_fast16_t ret = 0;
 	card_t cv;
 
-	assert(play);
-	assert(cih);
+	{	assert(play);
+		assert(cih);}
 
 	const float cn = cih[0],
 		  		cnn = (nplayers > 2) ? cih[1] : cih[0],
@@ -143,7 +143,7 @@ int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplay
 	}
 
 	return ret;
-} __attribute__((hot,pure,nonnull))
+}
 
 uint_fast32_t aiJudge(const struct aistate* const restrict as)
 {

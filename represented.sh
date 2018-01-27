@@ -15,7 +15,7 @@ fi
 for a in `cat start.dna | awk '{ print $1 }'` ; do
 	echo -ne "$a\t"
 	for i in $target ; do
-		grep $a $i 2>/dev/null | awk '{ print $2 }'
+		grep "^$a[[:space:]]" $i 2>/dev/null | awk '{ print $2 }'
 	done | sort -n | uniq | tr '\n' ' '
 	echo
 done

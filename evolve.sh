@@ -1,9 +1,9 @@
 #!/bin/bash
 
 games=10000
-scoretobeat=5100
+scoretobeat=4800
 
-maxpop=100
+maxpop=120
 minpop=50
 
 envfactor=20
@@ -17,8 +17,7 @@ if [ -n "`ls -l dna/ | grep total.0`" ] ; then
 		./newrandodna.sh start.dna
 	done
 fi
-mkdir -p scores/dna 2>/dev/null
-mkdir dead 2>/dev/null
+mkdir -p dna dead scores/dna 2>/dev/null
 
 function mutateandmerge() {
 	echo "Mutating and merging dnas"
@@ -37,13 +36,10 @@ function mutateandmerge() {
 function newscore() {
 	local dna=$1
 	local jf="`echo "$dna" | sed 's/^.*\/\([^\/]*\)$/\1/'`"
-	local nl="`cat scores/$dna 2>/dev/null | wc -l`"
-	if [ $nl -eq 0 -o `./randof 1 2 3` -eq 1 -a $nl -le 9 ] ; then
+	local nl="`cat scores/$dna 2>/dev/null | grep [0-9] | wc -l`"
+	if [ $nl -eq 0 -o `./randof $(seq 15)` -eq 1 -a $nl -le 9 ] ; then
 		./c.sh $dna p8-$jf
-		local out="`./p8-$jf -m14 -g$games | grep Player.0.won`"
-		local score="`echo "$out" | awk '{ print $4 }'`"
-		echo "$score" >> scores/$dna
-		local out="`./p8-$jf -m14 -g$games | grep Player.0.won`"
+		local out="`./p8-$jf -m25 -g$games | grep Player.0.won`"
 		local score="`echo "$out" | awk '{ print $4 }'`"
 		echo "$score" >> scores/$dna
 		rm p8-$jf
@@ -94,10 +90,14 @@ fi
 best=$scoretobeat
 
 while [ 1 ] ; do
+	alive=`ls -l dna/ | wc -l`
+	line
+	echo ">>> Gen: $gen, alive: $alive, scoretobeat: $scoretobeat, best: $best, env: $envfactor, bottlenecks: $bottlenecks"
+	line
 
-	line
-	echo ">>> Gen: $gen, alive: `ls -l dna/ | wc -l`, scoretobeat: $scoretobeat, best: $best, env: $envfactor, bottlenecks: $bottlenecks"
-	line
+	if [ $alive -gt $maxpop ] ; then
+		let "envfactor++"
+	fi
 
 	scores=""
 	all=""
@@ -107,7 +107,7 @@ while [ 1 ] ; do
 	for i in dna/* ; do
 		score="`echo "($(cat scores/$i | tr '\n' '+' | sed 's/+$//'))/$(cat scores/$i | wc -l)" | bc`"
 		if [ -z "$score" ] ; then
-			echo "Looks like you're trying to quit (or something went wrong)"
+			echo "Looks like you're trying to quit (or something went wrong on $i)"
 			rm -f p8-*
 			exit 1
 		fi
@@ -115,31 +115,36 @@ while [ 1 ] ; do
 			scores="$scores $score"
 			if [ $score -ge $best ] ; then
 				best=$score
-				echo "$i BEST: $score"
+				echo "$i *OK* ${score}"
 			else
-				echo "$i Okay: $score"
+				echo "$i  OK  $score"
 			fi
 			continue
 		fi
-		echo "$i died: $score"
+		echo "$i died $score"
 		mv "$i" dead/
 	done
 
 	line
 	mutateandmerge
-	while [ "`ls -l dna/ | wc -l`" -lt $minpop ] ; do
-		echo "Population bottleneck!"
+	population="`ls -l dna/ | wc -l`"
+	while [ $population -lt $minpop ] ; do
 		mutateandmerge
-		if [ $envfactor -gt 1 ] ; then
+		if [ $envfactor -ge 1 ] ; then
 			let "envfactor--"
 		fi
+		let "scoretobeat-=5"
 		let "bottlenecks++"
+		population="`ls -l dna/ | wc -l`"
+		if [ $population -le 1 ] ; then
+			echo "WARNING: Everyone died! Resurrecting top $maxpop dnas"
+			mv `./readscores.sh | tail -n$maxpop | awk '{ print $2 }' | xargs` dna/
+		fi
 	done
 
-	scoretobeat=$((envfactor+"`echo "$scores" | tr ' ' '\n' | grep [0-9] | sort | head -1`"))
-	if [ $scoretobeat -ge $best ] ; then
-		scoretobeat=$((best-10))
-		echo ">>> Environment harshness is outpacing fitness! <<<"
+	scoretobeat=$((envfactor+`echo "$scores" | tr ' ' '\n' | grep [0-9] | sort | head -1`))
+	if [ $((scoretobeat+50)) -ge $best ] ; then
+		let "scoretobeat-=50"
 	fi
 	let "gen++"
 done

@@ -10,7 +10,8 @@
 #define AI_JUDGE_H
 
 int_fast16_t evalPlayer(const struct player* const restrict p,
-						const size_t nplayers)
+						const size_t nplayers,
+						const size_t cn)
 	__attribute__((hot,pure,nonnull));
 
 int_fast16_t evalPlay(const struct play* const restrict p,

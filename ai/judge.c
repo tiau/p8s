@@ -1,7 +1,6 @@
 #include "judge.h"
 
-// TODO: tune tunables all throughout this function and evalPlay
-__attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* const restrict player, const size_t nplayers)
+int_fast16_t evalPlayer(const struct player* const restrict player, const size_t nplayers, const size_t cn)
 {
 	size_t i, run = 0, mr = 0;
 	int_fast16_t ret = 0;
@@ -12,7 +11,7 @@ __attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* c
 		assert(nplayers >= MINPLRS && nplayers <= MAXPLRS);}
 
 	if(!player->n)
-		return -32768;
+		return -16384;
 
 	for(i = 0; i < player->n; i++) {
 		suits[i] = getSuit(player->c[i]);
@@ -21,9 +20,9 @@ __attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* c
 		nvals[vals[i]]++;
 	}
 
-	if(player->n >= 4) {
-		for(i = 1; i <= 13; i++) {
-			if(nvals[i])
+	if(player->n >= 3) {
+		for(i = 0; i <= 13; i++) {
+			if(nvals[!i ? 13 : i])
 				run++;
 			else
 				run = 0;
@@ -32,39 +31,61 @@ __attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* c
 		}
 
 		/* Straight check */
-		if(mr == 4)
-			ret -= 2;
-		else if(mr > 4)
-			ret -= max(20 - player->n, 10*(10-mr) - 4*(player->n - 5));
+		ret -= mr + mr / player->n;
+		switch(mr) {
+			case 3:
+				ret -= 4; break;
+			case 4:
+				ret -= 5; break;
+			case 5:
+				ret -= 15; break;
+			case 6:
+				ret -= 16; break;
+			case 7:
+				ret -= 23; break;
+			case 8:
+				ret -= 23; break;
+			case 9:
+				ret -= 22; break;
+			case 10:
+				ret -= 23; break;
+			default:
+				ret -= 5; break;
+		}
 	}
 
 	/* Flush check and 0 suit scoring */
 	for(i = Clubs; i <= Spades; i++) {
 		switch(nsuits[i]) {
+			ret -= 2.5 * nsuits[i] - 1.5 * nsuits[i] / player->n;
 			case 0:
 				if(player->n > 2)
 					ret += player->n;
+				else
+					ret -= 1;
 				break;
 			case 1:
+				break;
 			case 2:
+				ret -= 4; break;
 			case 3:
-				break;
+				ret -= 8; break;
 			case 4:
-				ret -= 5;
-				break;
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-				ret -= 25;
-				break;
+				ret -= 10; break;
 			case 5:
+				ret -= 20; break;
+			case 6:
+				ret -= 16; break;
+			case 7:
+				ret -= 13; break;
+			case 8:
+				ret -= 6; break;
+			case 9:
+				ret -= 26; break;
 			case 10:
-				ret -= 30;
-				break;
+				ret -= 13; break;
 			default:
-				ret -= 20;
-				break;
+				ret -= 1; break;
 		}
 	}
 
@@ -72,16 +93,12 @@ __attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* c
 	for(i = 0; i < player->n; i++) {
 		switch(vals[i]) {
 			case 2:
-				ret += 6 + nplayers;
-				ret -= nvals[2]-1;
+				ret += 40 - 2*cn - 2*nplayers;
 				break;
 			case 3:
 				switch(nplayers) {
 					case 2:
-						if(nsuits[suits[i]] > 1)
-							ret -= 2;
-						else
-							ret += ((nvals[3] == 1) ? 15 : 3*(4 - nvals[3]) - (2*nvals[8]));
+						ret += 31 - 8*nsuits[suits[i]] + nvals[3] + 3.5*nvals[8];
 						break;
 					case 4:
 						ret += 1;
@@ -95,19 +112,39 @@ __attribute__((hot,pure,nonnull)) int_fast16_t evalPlayer(const struct player* c
 				}
 				break;
 			case 8:
-				ret -= 10 - nplayers;
-				ret -= nvals[8];
+				ret -= 46 + 4/player->n - 2*nplayers;
 				break;
 			default:
-				ret += 3;
-				ret -= nvals[vals[i]]-1;
+				ret += 26 + 3.5/cn;
 		}
 	}
 
+	size_t dubs = 0, trips = 0, quads = 0;
+	for(i = 0; i < (DECKLEN/4)+1; i++) {
+		switch(nvals[i]) {
+			case 4:
+				quads++;
+				break;
+			case 3:
+				trips++;
+				break;
+			case 2:
+				dubs++;
+				break;
+			default:
+				break;
+		}
+	}
+	ret -= 44 * dubs;
+	ret -= 74 * trips;
+	ret -= 35 * quads;
+	ret -= 7 * (dubs && trips);
+	ret -= 21 * (dubs && quads);
+	ret -= 14 * (trips && quads);
 	return ret;
 }
 
-__attribute__((hot,pure,nonnull)) int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplayers, const size_t* const restrict cih, const suit_t bestsuit)
+int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplayers, const size_t* const restrict cih, const suit_t bestsuit)
 {
 	size_t i;
 	int_fast16_t ret = 0;
@@ -116,34 +153,32 @@ __attribute__((hot,pure,nonnull)) int_fast16_t evalPlay(const struct play* const
 	{	assert(play);
 		assert(cih);}
 
-	const float cn = cih[0],
-		  		cnn = (nplayers > 2) ? cih[1] : cih[0],
-		  		f = 40.0 / (8.0 + cn * cn - cn);
+	const float cn = cih[0], cnn = (nplayers > 2) ? cih[1] : cih[0];
 
 	/* For the card at the end of the play */
 	cv = getVal(play->c[play->n-1]);
 	if(cv == 2)
-		ret += f;
+		ret += 11 + 2.5/cn - 2*nplayers;
 	else if(cv == 3)
-		ret += (nplayers == 2) ? f : (4.0 + 2.57 * cnn) / ((32.3 + cn) / (cnn + -1.26 * cn / cnn) + cnn - 3.47) + 22.3 / (4.89 + cn) - 3.57;
+		ret += 23 + 1.5/cn - 2*nplayers;
 	if(cv == 8)
-		ret += 8 - nplayers;
+		ret += 34 - 2*nplayers;
 	else if(bestsuit == getSuit(play->c[play->n-1]))
-		ret += (cv == 3 ? 5 * (4 - nplayers) : 1);
+		ret += (cv == 3 ? 13 - nplayers : 4);
 
 	/* Not at the end of the play */
 	for(i = 0; i < play->n - 1; i++) {
 		cv = getVal(play->c[i]);
 		if(cv == 2)
-			ret -= 2.0 / (((cn - 1.0) / 3.0) + .5);
+			ret += 2.5/cn;
 		else if(cv == 3)
-			ret -= (nplayers > 2) ? cnn > 4.0 : 1;
+			ret += (nplayers > 2) ? cnn > 4.0 : 0.5/cn;
 		else if(cv == 8 && i != 0)
-			ret -= 4 + (cn > 4.0);
+			ret += 2 - 0.5/cn;
 	}
 
 	return ret;
-}
+} __attribute__((hot,pure,nonnull))
 
 uint_fast32_t aiJudge(const struct aistate* const restrict as)
 {
@@ -172,7 +207,7 @@ uint_fast32_t aiJudge(const struct aistate* const restrict as)
 		play = plistGet(as->pl, i);
 		removeCards(&tplayer, play);
 		bestsuit = freqSuit(&tplayer);
-		playereval = evalPlayer(&tplayer, as->gs->nplayers);
+		playereval = evalPlayer(&tplayer, as->gs->nplayers, cih[0]);
 		moveeval = evalPlay(play, as->gs->nplayers, cih, bestsuit);
 		ep = playereval - moveeval;
 

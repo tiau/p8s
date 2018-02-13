@@ -35,6 +35,9 @@ int_fast16_t evalPlayerf(const struct player* const restrict player, const size_
 		ret -= SHM1 / 5.0 * mr;
 		ret -= SHM2 / 5.0 * mr / player->n;
 		switch(mr) {
+			case 1:
+			case 2:
+				ret -= abs(zSmallS); break;
 			case 3:
 				ret -= abs(z3S); break;
 			case 4:

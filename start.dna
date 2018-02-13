@@ -7,6 +7,7 @@ z8S	10
 z9S	10
 z10S	10
 LargeS	8
+zSmallS	0
 SHM1	0
 SHM2	0
 z0Su	1
@@ -25,7 +26,6 @@ SuM1	0
 SuM2	0
 Draw2	16
 Draw22	-4
-Skip0	-20
 Skip1	4
 Skip2	2
 Skip3	1

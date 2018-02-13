@@ -3,8 +3,8 @@
 games=10000
 scoretobeat=4800
 
-maxpop=120
-minpop=50
+maxpop=320
+minpop=80
 
 envfactor=20
 gen=1
@@ -37,8 +37,11 @@ function newscore() {
 	local dna=$1
 	local jf="`echo "$dna" | sed 's/^.*\/\([^\/]*\)$/\1/'`"
 	local nl="`cat scores/$dna 2>/dev/null | grep [0-9] | wc -l`"
-	if [ $nl -eq 0 -o `./randof $(seq 15)` -eq 1 -a $nl -le 9 ] ; then
+	if [ `./randof $(seq 0 $nl)` -eq 0 -a $nl -le 14 ] ; then
 		./c.sh $dna p8-$jf
+		local out="`./p8-$jf -m25 -g$games | grep Player.0.won`"
+		local score="`echo "$out" | awk '{ print $4 }'`"
+		echo "$score" >> scores/$dna
 		local out="`./p8-$jf -m25 -g$games | grep Player.0.won`"
 		local score="`echo "$out" | awk '{ print $4 }'`"
 		echo "$score" >> scores/$dna
@@ -69,7 +72,7 @@ if [ -n "$1" ] ; then
 		done
 		export -f newscore
 		export games
-		parallel --will-cite newscore ::: $all
+		parallel newscore ::: $all
 		for i in ${*} ; do
 			if [ -f "$i" ] ; then
 				mv dna/$jf $home 2>/dev/null
@@ -103,7 +106,7 @@ while [ 1 ] ; do
 	all=""
 	export -f newscore
 	export games
-	parallel --will-cite newscore ::: dna/*
+	parallel newscore ::: dna/*
 	for i in dna/* ; do
 		score="`echo "($(cat scores/$i | tr '\n' '+' | sed 's/+$//'))/$(cat scores/$i | wc -l)" | bc`"
 		if [ -z "$score" ] ; then
@@ -144,6 +147,7 @@ while [ 1 ] ; do
 			echo "WARNING: Everyone died! Resurrecting top $maxpop dnas"
 			mv `./readscores.sh | tail -n$maxpop | awk '{ print $2 }' | xargs` dna/
 			scores=$((best-100))
+			let "best-=10"
 		fi
 	done
 

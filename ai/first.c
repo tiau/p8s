@@ -1,7 +1,7 @@
 #include "first.h"
 
 // TODO: tune tunables all throughout this function and evalPlay
-static int_fast16_t evalPlayer(const struct player* const restrict player, const size_t nplayers, const size_t cn)
+int_fast16_t evalPlayerf(const struct player* const restrict player, const size_t nplayers, const size_t cn)
 {
 	size_t i, run = 0, mr = 0;
 	int_fast16_t ret = 0;
@@ -32,75 +32,77 @@ static int_fast16_t evalPlayer(const struct player* const restrict player, const
 		}
 
 		/* Straight check */
+		ret -= SHM1 / 5.0 * mr;
+		ret -= SHM2 / 5.0 * mr / player->n;
 		switch(mr) {
 			case 3:
-				ret -= (int)((float)abs(z3S) - (float)abs(SHM3)/5.0f * (float)player->n); break;
+				ret -= abs(z3S); break;
 			case 4:
-				ret -= (int)((float)abs(z4S) - (float)abs(SHM4)/5.0f * (float)player->n); break;
+				ret -= abs(z4S); break;
 			case 5:
-				ret -= (int)((float)abs(z5S) - (float)abs(SHM5)/5.0f * (float)player->n); break;
+				ret -= abs(z5S); break;
 			case 6:
-				ret -= (int)((float)abs(z6S) - (float)abs(SHM6)/5.0f * (float)player->n); break;
+				ret -= abs(z6S); break;
 			case 7:
-				ret -= (int)((float)abs(z7S) - (float)abs(SHM7)/5.0f * (float)player->n); break;
+				ret -= abs(z7S); break;
 			case 8:
-				ret -= (int)((float)abs(z8S) - (float)abs(SHM8)/5.0f * (float)player->n); break;
+				ret -= abs(z8S); break;
 			case 9:
-				ret -= (int)((float)abs(z9S) - (float)abs(SHM9)/5.0f * (float)player->n); break;
+				ret -= abs(z9S); break;
 			case 10:
-				ret -= (int)((float)abs(z10S) - (float)abs(SHM10)/5.0f * (float)player->n); break;
+				ret -= abs(z10S); break;
 			default:
-				ret -= (int)((float)abs(LargeS) - (float)abs(SHMLarge)/5.0f * (float)player->n); break;
+				ret -= abs(LargeS); break;
 		}
 	}
 
 	/* Flush check and 0 suit scoring */
 	for(i = Clubs; i <= Spades; i++) {
 		switch(nsuits[i]) {
+			ret -= SuM1 / 5.0 * nsuits[i];
+			ret -= SuM2 / 5.0 * nsuits[i] / player->n;
 			case 0:
 				if(player->n > 2)
 					ret += player->n;
 				else
-					ret -= (int)((float)abs(z0Su) - (float)abs(z0SuM)/5.0f * (float)player->n); break;
+					ret -= abs(z0Su);
 				break;
 			case 1:
-				ret -= (int)((float)abs(z1Su) - (float)abs(z1SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z1Su);
+				break;
 			case 2:
-				ret -= (int)((float)abs(z2Su) - (float)abs(z2SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z2Su); break;
 			case 3:
-				ret -= (int)((float)abs(z3Su) - (float)abs(z3SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z3Su); break;
 			case 4:
-				ret -= (int)((float)abs(z4Su) - (float)abs(z4SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z4Su); break;
 			case 5:
-				ret -= (int)((float)abs(z5Su) - (float)abs(z5SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z5Su); break;
 			case 6:
-				ret -= (int)((float)abs(z6Su) - (float)abs(z6SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z6Su); break;
 			case 7:
-				ret -= (int)((float)abs(z7Su) - (float)abs(z7SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z7Su); break;
 			case 8:
-				ret -= (int)((float)abs(z8Su) - (float)abs(z8SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z8Su); break;
 			case 9:
-				ret -= (int)((float)abs(z9Su) - (float)abs(z9SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z9Su); break;
 			case 10:
-				ret -= (int)((float)abs(z10Su) - (float)abs(z10SuM)/5.0f * (float)player->n); break;
+				ret -= abs(z10Su); break;
 			default:
-				ret -= (int)((float)abs(LargeSu) - (float)abs(LargeSuM)/5.0f * (float)player->n); break;
+				ret -= abs(LargeSu); break;
 		}
 	}
 
 	/* Full house / n of a kind check and overall scoring */
-	size_t dubs = 0;
-	size_t trips = 0;
-	size_t quads = 0;
 	for(i = 0; i < player->n; i++) {
 		switch(vals[i]) {
 			case 2:
-				ret -= Draw2 + (int)((float)Draw22 / (float)cn) - nplayers;
+				ret -= Draw2 - Draw22 / 5.0 * cn + nplayers * 2;
 				break;
 			case 3:
 				switch(nplayers) {
 					case 2:
-						ret -= Skip0 + (int)((float)Skip1*(float)nsuits[suits[i]]/5.0f) + (int)((float)Skip2 * (float)nvals[3]/5.0f) + (int)((float)Skip3 * (float)nvals[8] / 5.0f);
+						ret -= Skip1 + Skip2/5.0*nsuits[suits[i]] + Skip3/5.0*nvals[3] + Skip4/5.0*nvals[8];
 						break;
 					case 4:
 						ret += 1;
@@ -114,18 +116,25 @@ static int_fast16_t evalPlayer(const struct player* const restrict player, const
 				}
 				break;
 			case 8:
-				ret -= Eight + Eight2 / player->n - nplayers;
+				ret -= Eight + Eight2 / 5.0 / player->n - nplayers * 2;
 				break;
 			default:
-				ret += ACard + ACard2 / player->n + ACard3 / cn;
+				ret += ACard + ACard2 / 5.0 / player->n + ACard3 / 5.0 / cn;
 		}
-		switch(nvals[vals[i]]) {
+	}
+
+	size_t dubs = 0, trips = 0, quads = 0;
+	for(i = 0; i < (DECKLEN/4)+1; i++) {
+		switch(nvals[i]) {
 			case 4:
 				quads++;
+				break;
 			case 3:
 				trips++;
+				break;
 			case 2:
 				dubs++;
+				break;
 			default:
 				break;
 		}
@@ -133,9 +142,9 @@ static int_fast16_t evalPlayer(const struct player* const restrict player, const
 	ret -= DMod * dubs;
 	ret -= TMod * trips;
 	ret -= QMod * quads;
-	ret -= DTMod * (dubs && trips);
-	ret -= DQMod * (dubs && quads);
-	ret -= TQMod * (trips && quads);
+	ret -= abs(DTMod) * (dubs && trips);
+	ret -= abs(DQMod) * (dubs && quads);
+	ret -= abs(TQMod) * (trips && quads);
 	return ret;
 } __attribute__((hot,pure,nonnull))
 
@@ -154,23 +163,23 @@ static int_fast16_t evalPlay(const struct play* const restrict play, const size_
 	/* For the card at the end of the play */
 	cv = getVal(play->c[play->n-1]);
 	if(cv == 2)
-		ret += EP2 + EP22 / cn - nplayers;
+		ret += EP2 + EP22/5.0/cn - nplayers*2;
 	else if(cv == 3)
-		ret += EP3 + EP32 / cn - nplayers;
+		ret += EP3 + EP32/5.0/cn - nplayers*2;
 	if(cv == 8)
-		ret += EP8 - nplayers;
+		ret += EP8 - nplayers*2;
 	else if(bestsuit == getSuit(play->c[play->n-1]))
-		ret += (cv == 3 ? EPBS3 * (EPBS32 - nplayers) : EPBS);
+		ret += (cv == 3 ? EPBS3 * (EPBS32/5.0 - nplayers) : EPBS);
 
 	/* Not at the end of the play */
 	for(i = 0; i < play->n - 1; i++) {
 		cv = getVal(play->c[i]);
 		if(cv == 2)
-			ret -= W2 / cn;
+			ret -= W2/5.0/cn;
 		else if(cv == 3)
-			ret -= (nplayers > 2) ? cnn > 4.0 : W3;
+			ret -= (nplayers > 2) ? cnn <= 4.0 : W3/5.0/cn;
 		else if(cv == 8 && i != 0)
-			ret -= W8 + W8M * (cn > 4.0);
+			ret -= W8 + W8M/5.0/cn;
 	}
 
 	return ret;
@@ -203,7 +212,7 @@ uint_fast32_t aiFirst(const struct aistate* const restrict as)
 		play = plistGet(as->pl, i);
 		removeCards(&tplayer, play);
 		bestsuit = freqSuit(&tplayer);
-		playereval = evalPlayer(&tplayer, as->gs->nplayers, cih[0]);
+		playereval = evalPlayerf(&tplayer, as->gs->nplayers, cih[0]);
 		moveeval = evalPlay(play, as->gs->nplayers, cih, bestsuit);
 		ep = playereval - moveeval;
 

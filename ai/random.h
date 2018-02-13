@@ -1,4 +1,3 @@
-#include "judge.h"
 #include "first.h"
 
 #ifndef AI_RANDOM_H

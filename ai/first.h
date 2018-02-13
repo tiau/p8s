@@ -8,6 +8,8 @@
 #ifndef AI_FIRST_H
 #define AI_FIRST_H
 
+int_fast16_t evalPlayerf(const struct player* const restrict player, const size_t nplayers, const size_t cn);
+
 uint_fast32_t aiFirst(const struct aistate* const restrict as)
 	__attribute__((const,nonnull));
 

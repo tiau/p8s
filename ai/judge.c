@@ -33,24 +33,27 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 		/* Straight check */
 		ret -= mr + mr / player->n;
 		switch(mr) {
+			case 1:
+			case 2:
+				break;
 			case 3:
 				ret -= 4; break;
 			case 4:
 				ret -= 5; break;
 			case 5:
-				ret -= 15; break;
+				ret -= 20; break;
 			case 6:
-				ret -= 16; break;
+				ret -= 20; break;
 			case 7:
-				ret -= 23; break;
+				ret -= 16; break;
 			case 8:
-				ret -= 23; break;
+				ret -= 12; break;
 			case 9:
-				ret -= 22; break;
+				ret -= 18; break;
 			case 10:
-				ret -= 23; break;
+				ret -= 24; break;
 			default:
-				ret -= 5; break;
+				ret -= 14; break;
 		}
 	}
 
@@ -83,9 +86,9 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 			case 9:
 				ret -= 26; break;
 			case 10:
-				ret -= 13; break;
+				ret -= 30; break;
 			default:
-				ret -= 1; break;
+				ret -= 16; break;
 		}
 	}
 
@@ -135,12 +138,12 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 				break;
 		}
 	}
-	ret -= 44 * dubs;
-	ret -= 74 * trips;
-	ret -= 35 * quads;
-	ret -= 7 * (dubs && trips);
-	ret -= 21 * (dubs && quads);
-	ret -= 14 * (trips && quads);
+	ret -= 42 * dubs;
+	ret -= 58 * trips;
+	ret -= 54 * quads;
+	ret -= 28 * (dubs && trips);
+	ret -= 8 * (dubs && quads);
+	ret -= 10 * (trips && quads);
 	return ret;
 }
 

@@ -32,12 +32,11 @@ int_fast16_t evalPlayerf(const struct player* const restrict player, const size_
 		}
 
 		/* Straight check */
-		ret -= SHM1 / 5.0 * mr;
-		ret -= SHM2 / 5.0 * mr / player->n;
+		ret -= mr + mr / player->n;
 		switch(mr) {
 			case 1:
 			case 2:
-				ret -= abs(zSmallS); break;
+				break;
 			case 3:
 				ret -= abs(z3S); break;
 			case 4:
@@ -62,8 +61,7 @@ int_fast16_t evalPlayerf(const struct player* const restrict player, const size_
 	/* Flush check and 0 suit scoring */
 	for(i = Clubs; i <= Spades; i++) {
 		switch(nsuits[i]) {
-			ret -= SuM1 / 5.0 * nsuits[i];
-			ret -= SuM2 / 5.0 * nsuits[i] / player->n;
+			ret -= 2.5 * nsuits[i] - 1.5 * nsuits[i] / player->n;
 			case 0:
 				if(player->n > 2)
 					ret += player->n;
@@ -146,8 +144,8 @@ int_fast16_t evalPlayerf(const struct player* const restrict player, const size_
 	ret -= TMod * trips;
 	ret -= QMod * quads;
 	ret -= abs(DTMod) * (dubs && trips);
-	ret -= abs(DQMod) * (dubs && quads);
-	ret -= abs(TQMod) * (trips && quads);
+	ret -= 8 * (dubs && quads);
+	ret -= 10 * (trips && quads);
 	return ret;
 } __attribute__((hot,pure,nonnull))
 

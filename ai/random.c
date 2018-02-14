@@ -88,7 +88,7 @@ uint_fast32_t aiRandom(const struct aistate* const restrict as)
 		}
 	}
 
-	if(unlikely(hmb/ds > ((float)TH/1000)))
+	if(unlikely(hmb/ds > 0.5f))
 		MPACK(ret, as->pl->n);
 #ifdef JUDGE_VERBOSE
 	printf("%sdraw:%s\t%zu\t\t\t%.2f\t%s\n", ANSI_CYAN, ANSI_DEFAULT, as->pl->n, hmb/ds, (as->gs->drew) ? "pass" : "draw");

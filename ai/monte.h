@@ -22,13 +22,13 @@ __attribute__((unused)) static uint_fast32_t (*MonteSub)(const struct aistate* c
 
 /* The probability that apparently worse move W is actually better than best
  * apparent move B at which we cut off W from further computation. */
-static const float pCutOff = 0.0001;
+static const float pCutOff = 0.04;
 
 /* Maximum number of hypothetical games to play for a each possible move */
-static const size_t MaxGames = 20000;
+static const size_t MaxGames = 200;
 
 /* Minimum number of games to play with each move before ruling it out */
-static const size_t MinGames = 50;
+static const size_t MinGames = 8;
 
 /* Number of bytes sent per message queue message */
 #define BUFSZ 18

@@ -9,10 +9,9 @@ __attribute__((pure,nonnull,hot)) static uint_fast16_t mHash(const struct play* 
 		assert(play->n && play->n <= MAXCIP);}
 
 	/* Ternarys to treat all 8s as 8C (all 8s are the same) */
-	hash = (getVal(play->c[play->n-1]) == 8) ? 8 : play->c[play->n-1];
-	hash <<= 8;
+	hash = play->c[play->n-1] << 8;
 	for(i = 0; i < play->n-1; i++)
-		hash ^= (getVal(play->c[i]) == 8) ? 8 : play->c[i];
+		hash ^= play->c[i];
 
 	return hash % s;
 }
@@ -25,17 +24,16 @@ __attribute__((pure,nonnull,hot)) static bool isEqualEnough(const struct play* c
 
 	/* Plays may not be equiv because:
 	 * (1) They have different numbers of cards
-	 * (2) The card they end with differs (provided they aren't both eights) */
-	if(p1->n != p2->n || (p1->c[p1->n-1] != p2->c[p2->n-1] &&
-	   (getVal(p1->c[p1->n-1]) != 8 || getVal(p2->c[p2->n-1]) != 8)))
+	 * (2) The card they end with differs */
+	if(p1->n != p2->n || p1->c[p1->n-1] != p2->c[p2->n-1])
 		return false;
 
-	/* (3) Their non-end cards do not all match (w/ exception for 8s) */
+	/* (3) Their non-end cards do not all match */
 	size_t i, j;
 	size_t matches = 0;
 	for(i = 0; i < p1->n - 1; i++) {
 		for(j = 0; j < p1->n - 1; j++) {
-			if(p1->c[i] == p2->c[j] || (getVal(p1->c[i]) == 8 && getVal(p2->c[j]) == 8)) {
+			if(p1->c[i] == p2->c[j]) {
 				matches++;
 				break;
 			}

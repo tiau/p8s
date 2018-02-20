@@ -1,4 +1,6 @@
 #include "shedder.h"
+#include "stacked.h"
+#include "random.h"
 
 suit_t freqSuit(const struct player* const restrict player)
 {
@@ -24,24 +26,5 @@ suit_t freqSuit(const struct player* const restrict player)
 
 uint_fast32_t aiShedder(const struct aistate* const restrict as)
 {
-	uint_fast32_t ret = 0;
-	size_t i, best = 0;
-	const struct play* play;
-
-	{	assert(as);
-		assert(as->gs);
-		assert(as->pl);
-		assert(as->pl->n);
-		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
-
-	MPACK(ret, as->pl->n);
-	ESPACK(ret, freqSuit(stateToPlayer(as->gs)));
-	for(i = 0; i < as->pl->n; i++) {
-		play = plistGet(as->pl, i);
-		if(play->n > best) {
-			MPACK(ret, i);
-			best = play->n;
-		}
-	}
-	return ret;
+	return pctmRun(as, initStackedGameStateHypothetical, aiRandom, __func__);
 }

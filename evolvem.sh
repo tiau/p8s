@@ -1,7 +1,7 @@
 #!/bin/bash
 
 games=400
-scoretobeat=150
+scoretobeat=200
 
 maxpop=120
 minpop=30
@@ -39,7 +39,7 @@ function newscore() {
 	local nl="`cat scores/$dna 2>/dev/null | grep [0-9] | wc -l`"
 	if [ `./randof $(seq 0 $nl)` -eq 0 -a $nl -le 24 ] ; then
 		./c.sh $dna p8-$jf
-		local out="`./p8-$jf -m26 -g$games | grep Player.0.won`"
+		local out="`./p8-$jf -m37 -g$games | grep Player.0.won`"
 		local score="`echo "$out" | awk '{ print $4 }'`"
 		echo "$score" >> scores/$dna
 		rm p8-$jf
@@ -122,7 +122,7 @@ while [ 1 ] ; do
 			continue
 		fi
 		echo "$i died $score"
-		if [ $score -lt $((best-300)) ] ; then
+		if [ $score -lt $((best-20)) ] ; then
 			rm "$i"
 		else
 			mv "$i" dead/
@@ -137,14 +137,14 @@ while [ 1 ] ; do
 		if [ $envfactor -gt 1 ] ; then
 			let "envfactor--"
 		fi
-		let "scoretobeat-=1"
+		let "scoretobeat-=2"
 		let "bottlenecks++"
 		population="`ls -l dna/ | wc -l`"
 		if [ $population -le 1 ] ; then
 			echo "WARNING: Everyone died! Resurrecting top $maxpop dnas"
 			mv `./readscores.sh | tail -n$maxpop | awk '{ print $2 }' | xargs` dna/
 			scores=$((best-1))
-			let "best-=1"
+			let "best-=5"
 		fi
 	done
 

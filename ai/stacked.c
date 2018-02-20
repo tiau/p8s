@@ -33,15 +33,14 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const
 	uint_fast8_t deals;
 	int_fast16_t score, bscore = 32767;
 	struct gamestate bgs;
-	size_t cih[gs->nplayers]; 
+	size_t cih[ogs->nplayers];
 
 	{	assert(ogs);
 		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);}
 
-
 	initGameStateHypoShared(&bgs, ogs);
 	deals = scoreDraws(ogs);
-	populateCIH(gs, cih);
+	populateCIH(ogs, cih);
 
 	for(i = 0; ; i++) {
 		initGameStateHypoShared(gs, ogs);

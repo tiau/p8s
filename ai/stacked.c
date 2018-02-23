@@ -47,7 +47,7 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const
 		initDeckSans(&gs->deck, stateToPlayer(ogs), &ogs->pile);
 		dealStateSans(gs, ogs);
 		score = evalPlayer(&gs->players[gs->turn + 1 % gs->nplayers], gs->nplayers, cih[0]);
-		if(score < bscore) {
+		if(score < bscore || !bgs.players[0].n) {
 			copyGameState(&bgs, gs);
 			bscore = score;
 		}

@@ -12,6 +12,6 @@ suit_t freqSuit(const struct player* const restrict player)
 	__attribute__((hot,pure,nonnull));
 
 uint_fast32_t aiShedder(const struct aistate* const restrict as)
-	__attribute__((hot,pure,nonnull));
+	__attribute__((hot,nonnull));
 
 #endif /* AI_SHEDDER_H */

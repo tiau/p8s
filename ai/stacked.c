@@ -33,19 +33,21 @@ void initStackedGameStateHypothetical(struct gamestate* const restrict gs, const
 	uint_fast8_t deals;
 	int_fast16_t score, bscore = 32767;
 	struct gamestate bgs;
+	size_t cih[ogs->nplayers];
 
 	{	assert(ogs);
 		assert(ogs->nplayers >= MINPLRS && ogs->nplayers <= MAXPLRS);}
 
 	initGameStateHypoShared(&bgs, ogs);
 	deals = scoreDraws(ogs);
+	populateCIH(ogs, cih);
 
 	for(i = 0; ; i++) {
 		initGameStateHypoShared(gs, ogs);
 		initDeckSans(&gs->deck, stateToPlayer(ogs), &ogs->pile);
 		dealStateSans(gs, ogs);
-		score = evalPlayer(&gs->players[gs->turn + 1 % gs->nplayers], gs->nplayers);
-		if(score < bscore) {
+		score = evalPlayer(&gs->players[gs->turn + 1 % gs->nplayers], gs->nplayers, cih[0]);
+		if(score < bscore || !bgs.players[0].n) {
 			copyGameState(&bgs, gs);
 			bscore = score;
 		}

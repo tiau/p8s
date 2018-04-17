@@ -29,6 +29,7 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	ssize_t cur;
 	card_t c;
 	uint_fast32_t ret;
+	size_t cih[as->gs->nplayers];
 
 	{	assert(as);
 		assert(as->gs);
@@ -37,8 +38,14 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 		assert(as->gs->nplayers >= MINPLRS && as->gs->nplayers <= MAXPLRS);}
 
 	ret = aiJudge(as);
+
+	/* Don't draw or pass if playing will win */
+	if(unlikely(ret < -15000))
+		return ret;
+
 	p = stateToPlayer(as->gs);
-	cur = evalPlayer(p, as->gs->nplayers);
+	populateCIH(as->gs, cih);
+	cur = evalPlayer(p, as->gs->nplayers, cih[0]);
 
 	initDeckSans(&td, p, &as->gs->pile);
 	float hmb = 0.0f;
@@ -46,15 +53,17 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	suit_t ns = getSuit(*as->gs->pile.top);
 	card_t nv = getVal(*as->gs->pile.top);
 	if(!as->gs->drew) {
+		hmb += 18;
 		/* Count how many of the possible draws will make our hand better */
 		while(td.n--) {
 			tp = *p;
 			tp.c[tp.n++] = *td.top++;
-			hmb += (evalPlayer(&tp, as->gs->nplayers) + DrawThreshold < cur);
+			hmb += (evalPlayer(&tp, as->gs->nplayers, cih[0]) + DrawThreshold < cur);
 		}
 	/* We can't draw, don't even consider passing if there are only two players
 	 * and they just played an 8 */
-	} else if(likely(as->gs->nplayers != 2 || as->gs->eightSuit == Unknown)) {
+	} else {
+		hmb -= 2 - .012*(as->gs->nplayers != 2 || as->gs->eightSuit == Unknown);
 		const struct play* const restrict ptm = plistGet(as->pl, MUPACK(ret));
 		const suit_t playsuit = getVal(ptm->c[ptm->n-1]) == 8 ? ESUPACK(ret) : getSuit(ptm->c[ptm->n-1]);
 		const suit_t passsuit = as->gs->eightSuit == Unknown ? ns : as->gs->eightSuit;

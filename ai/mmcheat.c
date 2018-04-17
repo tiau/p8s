@@ -52,9 +52,11 @@ static float minimax(const struct gamestate* const restrict gs, size_t depth, fl
 
 	/* TODO: evaluate all plays here, instead of just the players' hands */
 	if(!--depth) {
+		size_t cih[gs->nplayers];
+		populateCIH(gs, cih);
 		v = 0.0;
 		for(i = 0; i < gs->nplayers; i++)
-			v += (i ? 0.1 : -1.0) * evalPlayer(&gs->players[i], gs->nplayers);
+			v += (i ? 0.1 : -1.0) * evalPlayer(&gs->players[i], gs->nplayers, cih[0]);
 		return v;
 	}
 

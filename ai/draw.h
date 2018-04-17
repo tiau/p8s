@@ -10,15 +10,15 @@
 
 /* How much better a given hand must be than our current hand to be considered
  * worth trying to draw for. Higher numbers make us less likely to draw. */
-static const float DrawThreshold = 3.2;
+static const float DrawThreshold = 3.08;
 
 /* The weightings on how much suit matching and value matching matter when
  * considering passing. Generally suits are more important since there're only
  * 4 of them to 13 values. Higher 'Play' numbers make us more likely to pass.
  * Higher 'Pass' numbers make us more likely to play. */
-static const float PlaySuitMult = 2.0f;
-static const float PlayValMult = 1.0f;
-static const float PassSuitMult = 1.5f;
+static const float PlaySuitMult = 1.96f;
+static const float PlayValMult = 1.54f;
+static const float PassSuitMult = 1.14f;
 static const float PassValMult = 0.8f;
 
 void initDeckSans(struct deck* const restrict deck,

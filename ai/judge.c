@@ -60,7 +60,6 @@ int_fast16_t evalPlayer(const struct player* const restrict player, const size_t
 	/* Flush check and 0 suit scoring */
 	for(i = Clubs; i <= Spades; i++) {
 		switch(nsuits[i]) {
-			ret -= 2.5 * nsuits[i] - 1.5 * nsuits[i] / player->n;
 			case 0:
 				if(player->n > 2)
 					ret += player->n;
@@ -156,7 +155,7 @@ int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplay
 	{	assert(play);
 		assert(cih);}
 
-	const float cn = cih[0], cnn = (nplayers > 2) ? cih[1] : cih[0];
+	const float cn = cih[0];
 
 	/* For the card at the end of the play */
 	cv = getVal(play->c[play->n-1]);
@@ -179,7 +178,7 @@ int_fast16_t evalPlay(const struct play* const restrict play, const size_t nplay
 	}
 
 	return ret;
-} __attribute__((hot,pure,nonnull))
+}
 
 uint_fast32_t aiJudge(const struct aistate* const restrict as)
 {

@@ -21,6 +21,9 @@ static const float PlayValMult = 1.54f;
 static const float PassSuitMult = 1.14f;
 static const float PassValMult = 0.8f;
 
+/* Don't consider drawing if we have more than this number of cards already. */
+static const size_t MaxDraw = CPP + 2;
+
 void initDeckSans(struct deck* const restrict deck,
 				  const struct player* const restrict player,
 				  const struct deck* const restrict pile)

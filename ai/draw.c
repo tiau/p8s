@@ -40,7 +40,8 @@ uint_fast32_t aiDraw(const struct aistate* const restrict as)
 	ret = aiJudge(as);
 
 	/* Don't draw or pass if playing will win */
-	if(unlikely(ret < -15000))
+	const size_t ncards = stateToPlayer(as->gs)->n;
+	if(unlikely(plistGet(as->pl, MUPACK(ret))->n == ncards || ncards > MaxDraw))
 		return ret;
 
 	p = stateToPlayer(as->gs);

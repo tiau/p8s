@@ -11,10 +11,10 @@
 /* The max number of different deals to attempt. This is essentially a measure
  * of pessimism, the more deals the more likely Stacked is to think its
  * opponent has a good hand. */
-static const size_t MaxDeals = 8;
+static const size_t MaxDeals = 6;
 
 /* What AI to call to play hypothetical games */
-__attribute__((unused)) static uint_fast32_t (*StackedSub)(const struct aistate* const restrict) = aiDraw;
+__attribute__((unused)) static uint_fast32_t (*StackedSub)(const struct aistate* const restrict) = aiJudge;
 
 void initStackedGameStateHypothetical(struct gamestate* const restrict gs,
 									  const struct gamestate* const restrict ogs)

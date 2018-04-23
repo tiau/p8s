@@ -1,3 +1,5 @@
+SCS	5
+SCP	5
 z3S	1
 z4S	2
 z5S	24
@@ -7,6 +9,8 @@ z8S	13
 z9S	11
 z10S	18
 LargeS	17
+FCS	16
+FCP	12
 z0Su	4
 z1Su	1
 z2Su	8
@@ -34,6 +38,8 @@ DMod	30
 TMod	37
 QMod	44
 DTMod	50
+DQMod	10
+TQMod	10
 EP2	26
 EP22	25
 EP3	16
@@ -54,3 +60,4 @@ PassV2	82
 OFFS	6
 OFFS2	-6
 EM	-6
+ExtraDraw	1

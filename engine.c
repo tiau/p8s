@@ -194,13 +194,13 @@ bool glHandleMagic(struct gamestate* const restrict gs, const uint8_t verbose)
 		gs->magic = false;
 
 		if(tc == 2) {
-			drawCard(gs);
-			drawCard(gs);
+			bool one = drawCard(gs);
+			bool two = drawCard(gs);
 			if(unlikely(verbose)) {
 				struct player* player = stateToPlayer(gs);
 				printf("%s2 played, drew:%s ", ANSI_BLUE, ANSI_DEFAULT);
-				showCard(player->c[player->n-2]);
-				showCard(player->c[player->n-1]);
+				if(one) showCard(player->c[player->n-2]);
+				if(two) showCard(player->c[player->n-1]);
 				printf("%s \n", ANSI_BACK);
 			}
 		} else if(tc == 3) {
